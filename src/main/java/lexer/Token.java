@@ -17,6 +17,7 @@ public class Token {
 
     @Override
     public String toString() {
-        return String.format("%d:%d %s %s", line, column, type, lexeme);
+        String litStr = (literal != null) ? " " + literal.toString() : "";
+        return String.format("%d:%d %s \"%s\"%s", line, column, type, lexeme, litStr);
     }
 }
