@@ -47,7 +47,7 @@ public class TestRunner {
 
     private static boolean runSingleTest(File srcFile) {
         String testName = srcFile.getName();
-        File expectedFile = new File(srcFile.getParent(), testName.replace(".src", ".out"));
+        File expectedFile = new File(srcFile.getParent(), testName.replace(".src", ".txt"));
 
         System.out.print("Testing " + testName + "... ");
 
@@ -63,7 +63,7 @@ public class TestRunner {
             }
 
             if (!expectedFile.exists()) {
-                System.out.println(ANSI_RED + "MISSING .out FILE" + ANSI_RESET);
+                System.out.println(ANSI_RED + "MISSING out FILE" + ANSI_RESET);
                 return false;
             }
 

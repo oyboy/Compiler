@@ -1,0 +1,7 @@
+1:1 KW_INT "int"
+1:5 IDENTIFIER "x"
+1:7 OP_ASSIGN "="
+1:9 LIT_INT "1" 1
+1:10 SEMICOLON ";"
+2:1 ERROR "Unterminated multi-line comment"
+4:15 EOF ""

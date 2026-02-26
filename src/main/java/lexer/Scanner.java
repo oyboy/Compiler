@@ -9,6 +9,7 @@ public class Scanner {
     private int current = 0;
     private int line = 1;
     private int column = 1;
+    private int startLine = 1;
     private int startColumn = 1;
 
     private Token stashedToken = null;
@@ -57,6 +58,7 @@ public class Scanner {
 
         start = current;
         startColumn = column;
+        startLine = line;
 
         if (isAtEnd()) return makeToken(TokenType.EOF, null);
 
@@ -70,13 +72,22 @@ public class Scanner {
             case ')': return makeToken(TokenType.RPAREN);
             case '{': return makeToken(TokenType.LBRACE);
             case '}': return makeToken(TokenType.RBRACE);
+            case '[': return makeToken(TokenType.LBRACKET);
+            case ']': return makeToken(TokenType.RBRACKET);
+            case ':': return makeToken(TokenType.COLON);
             case ';': return makeToken(TokenType.SEMICOLON);
             case ',': return makeToken(TokenType.COMMA);
             case '.': return makeToken(TokenType.DOT);
 
-            case '+': return makeToken(TokenType.OP_PLUS);
-            case '-': return makeToken(TokenType.OP_MINUS);
-            case '*': return makeToken(TokenType.OP_MULTIPLY);
+            case '+':
+                if (match('=')) return makeToken(TokenType.PLUS_ASSIGN);
+                return makeToken(TokenType.OP_PLUS);
+            case '-':
+                if (match('=')) return makeToken(TokenType.MINUS_ASSIGN);
+                return makeToken(TokenType.OP_MINUS);
+            case '*':
+                if (match('=')) return makeToken(TokenType.MULTIPLY_ASSIGN);
+                return makeToken(TokenType.OP_MULTIPLY);
             case '%': return makeToken(TokenType.OP_MODULO);
 
             case '!': return makeToken(match('=') ? TokenType.OP_NEQ : TokenType.OP_NOT);
@@ -88,10 +99,18 @@ public class Scanner {
                 if (match('&')) return makeToken(TokenType.OP_AND);
                 return errorToken("Unexpected character '&'");
 
+            case '|':
+                if (match('|')) return makeToken(TokenType.OP_OR);
+                return errorToken("Unexpected character '|'");
+
             case '/':
                 if (match('/')) {
                     while (peek() != '\n' && !isAtEnd()) advance();
                     return scanToken();
+
+                }
+                else if (match('=')) {
+                    return makeToken(TokenType.DIVIDE_ASSIGN);
                 } else if (match('*')) {
                     return scanMultiLineComment();
                 } else {
@@ -140,13 +159,12 @@ public class Scanner {
     }
 
     private Token string() {
-        while (peek() != '"' && !isAtEnd()) {
-            if (peek() == '\n') { line++; column = 1; }
+        while (peek() != '"' && !isAtEnd() && peek() != '\n' && peek() != '\r') {
             advance();
         }
-
-        if (isAtEnd()) return errorToken("Unterminated string");
-
+        if (isAtEnd() || peek() == '\n' || peek() == '\r') {
+            return errorToken("Unterminated string");
+        }
         advance();
 
         String value = source.substring(start + 1, current - 1);
@@ -217,8 +235,8 @@ public class Scanner {
                     break;
                 case '\n':
                     line++;
-                    column = 1;
                     advance();
+                    column = 1;
                     break;
                 default:
                     return;
@@ -232,10 +250,10 @@ public class Scanner {
 
     private Token makeToken(TokenType type, Object literal) {
         String text = source.substring(start, current);
-        return new Token(type, text, literal, line, startColumn);
+        return new Token(type, text, literal, startLine, startColumn);
     }
 
     private Token errorToken(String message) {
-        return new Token(TokenType.ERROR, message, null, line, startColumn);
+        return new Token(TokenType.ERROR, message, null, startLine, startColumn);
     }
 }

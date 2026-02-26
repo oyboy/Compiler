@@ -1,0 +1,8 @@
+1:1 ERROR "Unterminated string"
+2:1 KW_INT "int"
+2:5 IDENTIFIER "x"
+2:7 OP_ASSIGN "="
+2:9 LIT_INT "42" 42
+2:11 SEMICOLON ";"
+2:12 ERROR "Unterminated string"
+2:13 EOF ""
