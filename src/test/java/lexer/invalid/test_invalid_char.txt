@@ -1,0 +1,15 @@
+1:1 KW_INT "int"
+1:5 IDENTIFIER "user"
+1:9 ERROR "Unexpected character: @"
+1:10 IDENTIFIER "name"
+1:15 OP_ASSIGN "="
+1:17 LIT_INT "5" 5
+1:18 SEMICOLON ";"
+2:1 ERROR "Unexpected character: #"
+2:2 IDENTIFIER "hashtag"
+3:1 IDENTIFIER "val"
+3:5 OP_ASSIGN "="
+3:7 ERROR "Unexpected character: $"
+3:8 LIT_INT "100" 100
+3:11 SEMICOLON ";"
+3:12 EOF ""

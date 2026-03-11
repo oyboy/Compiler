@@ -1,0 +1,4 @@
+1:1 LIT_STRING ""hello"" hello
+1:9 LIT_STRING ""world"" world
+1:17 LIT_STRING ""test with spaces"" test with spaces
+1:35 EOF ""
