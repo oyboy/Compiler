@@ -1,0 +1,2 @@
+[Line 2, Col 12] Expect expression. Got: SEMICOLON (';')
+[Line 3, Col 1] Expect declaration (fn, struct, or variable). Got: RBRACE ('}')

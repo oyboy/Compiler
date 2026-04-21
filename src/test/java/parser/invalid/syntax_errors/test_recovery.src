@@ -1,0 +1,7 @@
+fn first() -> void {
+    int x =;
+}
+
+fn second() -> void {
+    int y = 10;
+}

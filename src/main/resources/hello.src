@@ -1,9 +1,26 @@
-#include <stdio.h>
-
-int main() {
+fn main() -> int {
     int x = 1;
-    printf("Hello, World!\n");
-    return 0;
+    int y = 2;
+    int sum = x + y;
+    return sum;
+}
+
+fn factorial(int n) -> int {
+    if (n <= 1) {
+        return 1;
+    }
+    return n * factorial(n - 1);
+}
+
+struct Point {
+    int x;
+    int y;
+}
+
+fn distance(float x1, float y1) -> float {
+    float dx = x1 * x1;
+    float dy = y1 * y1;
+    return dx + dy;
 }
 /* comment */
 // nothing

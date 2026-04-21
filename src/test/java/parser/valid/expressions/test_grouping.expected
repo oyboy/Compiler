@@ -1,0 +1,7 @@
+Program:
+  FunctionDecl: test -> void
+    Parameters: []
+    Body:
+      Block:
+        VarDecl: int x = ((1 + 2) * (3 - 4))
+        VarDecl: int y = 5

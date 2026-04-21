@@ -1,0 +1,18 @@
+Program:
+  FunctionDecl: test -> void
+    Parameters: []
+    Body:
+      Block:
+        If:
+          Condition: (x > 0)
+          Then:
+            Block:
+              VarDecl: int a = 1
+        If:
+          Condition: (x == 0)
+          Then:
+            Block:
+              VarDecl: int b = 2
+          Else:
+            Block:
+              VarDecl: int c = 3

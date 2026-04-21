@@ -1,0 +1,13 @@
+Program:
+  StructDecl: Empty
+    Fields:
+  StructDecl: Point
+    Fields:
+      VarDecl: int x
+      VarDecl: int y
+  StructDecl: Color
+    Fields:
+      VarDecl: int r
+      VarDecl: int g
+      VarDecl: int b
+      VarDecl: int a

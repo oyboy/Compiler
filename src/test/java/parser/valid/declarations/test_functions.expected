@@ -1,0 +1,20 @@
+Program:
+  FunctionDecl: noArgs -> void
+    Parameters: []
+    Body:
+      Block:
+  FunctionDecl: oneArg -> int
+    Parameters: [int x]
+    Body:
+      Block:
+        Return: x
+  FunctionDecl: multiArgs -> int
+    Parameters: [int a, float b, bool c]
+    Body:
+      Block:
+        Return: 0
+  FunctionDecl: noReturn -> void
+    Parameters: []
+    Body:
+      Block:
+        VarDecl: int x = 1

@@ -1,0 +1,11 @@
+fn test1() -> void {
+    return;
+}
+
+fn test2() -> int {
+    return 42;
+}
+
+fn test3() -> int {
+    return 1 + 2;
+}

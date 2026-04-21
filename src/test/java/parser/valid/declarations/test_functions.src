@@ -1,0 +1,13 @@
+fn noArgs() -> void {}
+
+fn oneArg(int x) -> int {
+    return x;
+}
+
+fn multiArgs(int a, float b, bool c) -> int {
+    return 0;
+}
+
+fn noReturn() -> void {
+    int x = 1;
+}

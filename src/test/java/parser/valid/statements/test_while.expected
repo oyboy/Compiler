@@ -1,0 +1,10 @@
+Program:
+  FunctionDecl: test -> void
+    Parameters: []
+    Body:
+      Block:
+        While:
+          Condition: (x > 0)
+          Body:
+            Block:
+              ExprStmt: (x = (x - 1))

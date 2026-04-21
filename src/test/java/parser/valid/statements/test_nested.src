@@ -1,0 +1,9 @@
+fn test() -> void {
+    if (a > 0) {
+        while (b < 10) {
+            if (c == 5) {
+                return;
+            }
+        }
+    }
+}

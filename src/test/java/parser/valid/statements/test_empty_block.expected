@@ -1,0 +1,14 @@
+Program:
+  FunctionDecl: test -> void
+    Parameters: []
+    Body:
+      Block:
+        Block:
+        If:
+          Condition: true
+          Then:
+            Block:
+        While:
+          Condition: false
+          Body:
+            Block:

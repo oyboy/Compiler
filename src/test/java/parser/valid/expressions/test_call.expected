@@ -1,0 +1,9 @@
+Program:
+  FunctionDecl: test -> void
+    Parameters: []
+    Body:
+      Block:
+        ExprStmt: foo()
+        ExprStmt: bar(1)
+        ExprStmt: baz(1, 2, 3)
+        VarDecl: int r = add(1, 2)

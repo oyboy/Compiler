@@ -1,0 +1,13 @@
+Program:
+  FunctionDecl: test -> void
+    Parameters: []
+    Body:
+      Block:
+        For:
+          Init:
+            VarDecl: int i = 0
+          Condition: (i < 10)
+          Update: (i = (i + 1))
+          Body:
+            Block:
+              VarDecl: int x = i

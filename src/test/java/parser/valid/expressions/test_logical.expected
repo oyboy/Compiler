@@ -1,0 +1,8 @@
+Program:
+  FunctionDecl: test -> void
+    Parameters: []
+    Body:
+      Block:
+        VarDecl: bool a = (true && false)
+        VarDecl: bool b = (true || (false && true))
+        VarDecl: bool c = ((1 == 2) || (3 != 4))

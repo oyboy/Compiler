@@ -1,0 +1,17 @@
+Program:
+  FunctionDecl: factorial -> int
+    Parameters: [int n]
+    Body:
+      Block:
+        If:
+          Condition: (n <= 1)
+          Then:
+            Block:
+              Return: 1
+        Return: (n * factorial((n - 1)))
+  FunctionDecl: main -> int
+    Parameters: []
+    Body:
+      Block:
+        VarDecl: int result = factorial(5)
+        Return: result

@@ -1,0 +1,11 @@
+Program:
+  FunctionDecl: test -> void
+    Parameters: []
+    Body:
+      Block:
+        VarDecl: int x = 0
+        ExprStmt: (x = 5)
+        ExprStmt: (x = (x + 10))
+        ExprStmt: (x = (x - 3))
+        ExprStmt: (x = (x * 2))
+        ExprStmt: (x = (x / 4))

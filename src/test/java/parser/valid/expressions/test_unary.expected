@@ -1,0 +1,8 @@
+Program:
+  FunctionDecl: test -> void
+    Parameters: []
+    Body:
+      Block:
+        VarDecl: int a = (-5)
+        VarDecl: bool b = (!true)
+        VarDecl: int c = (-(-3))

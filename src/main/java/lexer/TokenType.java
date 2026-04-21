@@ -18,5 +18,7 @@ public enum TokenType {
 
     PLUS_ASSIGN, MINUS_ASSIGN, MULTIPLY_ASSIGN, DIVIDE_ASSIGN,
 
+    ARROW,
+
     EOF, ERROR
 }

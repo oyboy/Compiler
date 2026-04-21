@@ -1,0 +1,2 @@
+[Line 3, Col 5] Expect ';' after variable declaration. Got: KW_INT ('int')
+[Line 4, Col 1] Expect declaration (fn, struct, or variable). Got: RBRACE ('}')

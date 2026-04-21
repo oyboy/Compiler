@@ -1,0 +1,9 @@
+Program:
+  FunctionDecl: test -> void
+    Parameters: []
+    Body:
+      Block:
+        VarDecl: int a
+        VarDecl: float b = 3.14
+        VarDecl: bool c = true
+        VarDecl: int d = (1 + 2)

@@ -83,6 +83,7 @@ public class Scanner {
                 if (match('=')) return makeToken(TokenType.PLUS_ASSIGN);
                 return makeToken(TokenType.OP_PLUS);
             case '-':
+                if (match('>')) return makeToken(TokenType.ARROW);
                 if (match('=')) return makeToken(TokenType.MINUS_ASSIGN);
                 return makeToken(TokenType.OP_MINUS);
             case '*':

@@ -1,0 +1,2 @@
+[Line 2, Col 8] Expect '(' after 'if'. Got: IDENTIFIER ('x')
+[Line 4, Col 5] Expect declaration (fn, struct, or variable). Got: RBRACE ('}')

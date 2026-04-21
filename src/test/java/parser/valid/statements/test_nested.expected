@@ -1,0 +1,18 @@
+Program:
+  FunctionDecl: test -> void
+    Parameters: []
+    Body:
+      Block:
+        If:
+          Condition: (a > 0)
+          Then:
+            Block:
+              While:
+                Condition: (b < 10)
+                Body:
+                  Block:
+                    If:
+                      Condition: (c == 5)
+                      Then:
+                        Block:
+                          Return

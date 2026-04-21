@@ -1,0 +1,16 @@
+Program:
+  FunctionDecl: test1 -> void
+    Parameters: []
+    Body:
+      Block:
+        Return
+  FunctionDecl: test2 -> int
+    Parameters: []
+    Body:
+      Block:
+        Return: 42
+  FunctionDecl: test3 -> int
+    Parameters: []
+    Body:
+      Block:
+        Return: (1 + 2)

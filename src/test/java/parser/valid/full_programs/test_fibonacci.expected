@@ -1,0 +1,27 @@
+Program:
+  FunctionDecl: fib -> int
+    Parameters: [int n]
+    Body:
+      Block:
+        If:
+          Condition: (n <= 0)
+          Then:
+            Block:
+              Return: 0
+        If:
+          Condition: (n == 1)
+          Then:
+            Block:
+              Return: 1
+        Return: (fib((n - 1)) + fib((n - 2)))
+  FunctionDecl: main -> void
+    Parameters: []
+    Body:
+      Block:
+        VarDecl: int i = 0
+        While:
+          Condition: (i < 10)
+          Body:
+            Block:
+              VarDecl: int f = fib(i)
+              ExprStmt: (i = (i + 1))

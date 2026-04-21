@@ -1,0 +1,5 @@
+fn test() -> void {
+    int a = -5;
+    bool b = !true;
+    int c = -(-3);
+}

@@ -1,0 +1,4 @@
+fn test() -> void {
+    while (true)
+        int x = 1;
+}

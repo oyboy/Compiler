@@ -1,0 +1,6 @@
+fn test() -> void {
+    foo();
+    bar(1);
+    baz(1, 2, 3);
+    int r = add(1, 2);
+}

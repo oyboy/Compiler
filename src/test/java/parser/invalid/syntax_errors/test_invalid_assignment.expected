@@ -1,0 +1,2 @@
+[Line 2, Col 7] Invalid assignment target. Got: OP_ASSIGN ('=')
+[Line 3, Col 1] Expect declaration (fn, struct, or variable). Got: RBRACE ('}')

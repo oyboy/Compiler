@@ -1,0 +1,44 @@
+digraph AST {
+  rankdir=TB;
+  node [shape=box, fontname="Courier", fontsize=10];
+
+  n0 [label="Program", style=filled, fillcolor="lightblue"];
+  n1 [label="VarDecl\nint x", style=filled, fillcolor="#FFFFCC"];
+  n2 [label="Literal\nint: 1", style=filled, fillcolor="#FFA07A"];
+  n1 -> n2;
+  n0 -> n1;
+  n3 [label="VarDecl\nint y", style=filled, fillcolor="#FFFFCC"];
+  n4 [label="Literal\nint: 2", style=filled, fillcolor="#FFA07A"];
+  n3 -> n4;
+  n0 -> n3;
+  n5 [label="VarDecl\nint sum", style=filled, fillcolor="#FFFFCC"];
+  n6 [label="BinaryOp\n+", style=filled, fillcolor="#FFD700"];
+  n7 [label="Identifier\nx", style=filled, fillcolor="#FFA07A"];
+  n6 -> n7;
+  n8 [label="Identifier\ny", style=filled, fillcolor="#FFA07A"];
+  n6 -> n8;
+  n5 -> n6;
+  n0 -> n5;
+  n9 [label="StructDecl\nPoint", style=filled, fillcolor="#90EE90"];
+  n10 [label="VarDecl\nint x", style=filled, fillcolor="#FFFFCC"];
+  n9 -> n10;
+  n11 [label="VarDecl\nint y", style=filled, fillcolor="#FFFFCC"];
+  n9 -> n11;
+  n0 -> n9;
+  n12 [label="VarDecl\nfloat dx", style=filled, fillcolor="#FFFFCC"];
+  n13 [label="BinaryOp\n*", style=filled, fillcolor="#FFD700"];
+  n14 [label="Identifier\nx1", style=filled, fillcolor="#FFA07A"];
+  n13 -> n14;
+  n15 [label="Identifier\nx1", style=filled, fillcolor="#FFA07A"];
+  n13 -> n15;
+  n12 -> n13;
+  n0 -> n12;
+  n16 [label="VarDecl\nfloat dy", style=filled, fillcolor="#FFFFCC"];
+  n17 [label="BinaryOp\n*", style=filled, fillcolor="#FFD700"];
+  n18 [label="Identifier\ny1", style=filled, fillcolor="#FFA07A"];
+  n17 -> n18;
+  n19 [label="Identifier\ny1", style=filled, fillcolor="#FFA07A"];
+  n17 -> n19;
+  n16 -> n17;
+  n0 -> n16;
+}

@@ -1,0 +1,9 @@
+Program:
+  FunctionDecl: test -> void
+    Parameters: []
+    Body:
+      Block:
+        VarDecl: bool a = (1 < 2)
+        VarDecl: bool b = (3 >= 4)
+        VarDecl: bool c = (5 <= 6)
+        VarDecl: bool d = (7 > 8)
