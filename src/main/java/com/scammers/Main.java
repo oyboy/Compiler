@@ -5,8 +5,11 @@ import lexer.Token;
 import lexer.TokenType;
 import parser.Parser;
 import parser.ast.ProgramNode;
+import semantic.SemanticAnalyzer;
 import utils.ASTPrettyPrinter;
 import utils.ASTDotGenerator;
+import utils.TypeAnnotatedPrinter;
+import utils.ValidationReport;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,6 +23,9 @@ public class Main {
         String outputFile = null;
         String format = "text";
         boolean verbose = false;
+        boolean showTypes = false;
+        boolean showSymbols = false;
+        boolean showReport = false;
 
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
@@ -27,6 +33,9 @@ public class Main {
                 case "--output-file": outputFile = args[++i]; break;
                 case "--verbose": verbose = true; break;
                 case "--input": inputFile = args[++i]; break;
+                case "--show-types": showTypes = true; break;
+                case "--show-symbols": showSymbols = true; break;
+                case "--show-report": showReport = true; break;
                 default:
                     if (!args[i].startsWith("--")) inputFile = args[i];
             }
@@ -60,6 +69,28 @@ public class Main {
             if (!parser.getErrors().isEmpty()) {
                 System.err.println("Parse errors:");
                 parser.getErrors().forEach(e -> System.err.println("  " + e));
+            }
+
+            SemanticAnalyzer analyzer = new SemanticAnalyzer();
+            analyzer.analyze(program);
+
+            if (showReport) {
+                System.out.println(ValidationReport.generate(program, analyzer));
+            } else {
+                if (showTypes) {
+                    TypeAnnotatedPrinter printer = new TypeAnnotatedPrinter();
+                    System.out.println(printer.print(program));
+                } else {
+                    ASTPrettyPrinter printer = new ASTPrettyPrinter();
+                    System.out.println(printer.print(program));
+                }
+                if (showSymbols) {
+                    System.out.println(analyzer.getSymbolTable().dump());
+                }
+                if (!analyzer.getErrors().isEmpty()) {
+                    System.err.println("--- Semantic Errors ---");
+                    analyzer.getErrors().forEach(e -> System.err.println(e.toString()));
+                }
             }
 
             String output = "./";

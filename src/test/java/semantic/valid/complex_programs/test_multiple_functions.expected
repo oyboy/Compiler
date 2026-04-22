@@ -1,0 +1,5 @@
+=== Symbol Table Dump ===
+[Scope depth 0]
+  FUNCTION add:fn(int, int) -> int (declared at 1:1)
+  FUNCTION multiply:fn(int, int) -> int (declared at 5:1)
+  FUNCTION compute:fn(int) -> int (declared at 9:1)

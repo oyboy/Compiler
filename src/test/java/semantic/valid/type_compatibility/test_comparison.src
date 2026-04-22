@@ -1,0 +1,6 @@
+fn test() -> void {
+    bool a = 1 < 2;
+    bool b = 3 >= 2;
+    bool c = 4 == 4;
+    bool d = 5 != 6;
+}

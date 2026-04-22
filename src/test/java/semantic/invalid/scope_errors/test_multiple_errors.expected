@@ -1,0 +1,9 @@
+semantic error: Undeclared identifier 'undeclared'
+  --> 2:13
+  context: in function 'test'
+semantic error: Cannot assign 'int' to variable of type 'bool'
+  --> 3:10
+  context: in function 'test'
+semantic error: Undeclared function 'foo'
+  --> 4:13
+  context: in function 'test'

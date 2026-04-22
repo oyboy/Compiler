@@ -1,0 +1,3 @@
+semantic error: Cannot return 'bool' from function 'getValue' declared to return 'int'
+  --> 2:5
+  context: in function 'getValue'

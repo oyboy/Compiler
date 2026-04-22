@@ -1,0 +1,3 @@
+semantic error: Argument 1 of 'square': expected 'int', got 'bool'
+  --> 6:13
+  context: in function 'test'

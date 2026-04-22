@@ -1,0 +1,4 @@
+=== Symbol Table Dump ===
+[Scope depth 0]
+  STRUCT Point:struct Point (declared at 1:1)
+  FUNCTION makePoint:fn(int, int) -> void (declared at 6:1)

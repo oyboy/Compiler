@@ -1,0 +1,3 @@
+=== Symbol Table Dump ===
+[Scope depth 0]
+  FUNCTION test:fn() -> void (declared at 1:1)

@@ -1,0 +1,3 @@
+fn getValue() -> int {
+    return true;
+}

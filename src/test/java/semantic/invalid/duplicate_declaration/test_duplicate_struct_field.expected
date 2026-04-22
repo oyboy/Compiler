@@ -1,0 +1,3 @@
+semantic error: Duplicate field 'x' in struct 'Point'
+  --> 3:9
+  context: struct 'Point'

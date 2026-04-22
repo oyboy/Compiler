@@ -1,0 +1,3 @@
+semantic error: Function 'add' expects 2 arguments, got 1
+  --> 6:13
+  context: in function 'test'

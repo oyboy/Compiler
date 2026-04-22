@@ -1,0 +1,8 @@
+struct Point {
+    int x;
+    int y;
+}
+
+fn makePoint(int x, int y) -> void {
+    int sum = x + y;
+}

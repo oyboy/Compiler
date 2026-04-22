@@ -1,0 +1,3 @@
+semantic error: Undeclared identifier 'x'
+  --> 5:13
+  context: in function 'test'

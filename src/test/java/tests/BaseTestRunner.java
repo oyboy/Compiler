@@ -75,9 +75,7 @@ public abstract class BaseTestRunner {
             actual = actual.trim().replace("\r\n", "\n");
 
             if (!expectedFile.exists()) {
-                Files.writeString(expectedFile.toPath(), actual);
                 System.out.println(YELLOW + "CREATED " + ext + RESET);
-                passed++;
                 return;
             }
 

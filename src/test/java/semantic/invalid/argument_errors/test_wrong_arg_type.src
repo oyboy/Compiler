@@ -1,0 +1,7 @@
+fn square(int n) -> int {
+    return n * n;
+}
+
+fn test() -> void {
+    int x = square(true);
+}

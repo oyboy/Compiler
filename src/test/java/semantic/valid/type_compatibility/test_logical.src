@@ -1,0 +1,5 @@
+fn test() -> void {
+    bool a = true && false;
+    bool b = true || false;
+    bool c = !true;
+}

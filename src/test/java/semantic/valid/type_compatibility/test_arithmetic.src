@@ -1,0 +1,8 @@
+fn test() -> void {
+    int a = 2 + 3;
+    int b = 10 - 4;
+    int c = 3 * 4;
+    int d = 10 / 2;
+    int e = 10 % 3;
+    float f = 1 + 2.5;
+}

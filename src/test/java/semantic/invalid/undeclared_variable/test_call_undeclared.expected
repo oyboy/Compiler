@@ -1,0 +1,3 @@
+semantic error: Undeclared function 'foo'
+  --> 2:13
+  context: in function 'test'

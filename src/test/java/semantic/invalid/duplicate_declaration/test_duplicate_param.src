@@ -1,0 +1,1 @@
+fn test(int x, int x) -> void {}

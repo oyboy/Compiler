@@ -1,0 +1,5 @@
+fn greet() -> void {}
+
+fn test() -> void {
+    greet(1, 2);
+}

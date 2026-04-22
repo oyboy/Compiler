@@ -1,0 +1,4 @@
+=== Symbol Table Dump ===
+[Scope depth 0]
+  FUNCTION factorial:fn(int) -> int (declared at 1:1)
+  FUNCTION main:fn() -> int (declared at 8:1)

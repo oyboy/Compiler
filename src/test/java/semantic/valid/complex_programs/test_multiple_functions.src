@@ -1,0 +1,13 @@
+fn add(int a, int b) -> int {
+    return a + b;
+}
+
+fn multiply(int a, int b) -> int {
+    return a * b;
+}
+
+fn compute(int x) -> int {
+    int s = add(x, 1);
+    int m = multiply(s, 2);
+    return m;
+}

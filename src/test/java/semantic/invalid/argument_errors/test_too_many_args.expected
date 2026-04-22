@@ -1,0 +1,3 @@
+semantic error: Function 'greet' expects 0 arguments, got 2
+  --> 4:5
+  context: in function 'test'

@@ -1,0 +1,3 @@
+semantic error: Operator '&&' requires bool operands, got 'int' and 'int'
+  --> 2:14
+  context: in function 'test'

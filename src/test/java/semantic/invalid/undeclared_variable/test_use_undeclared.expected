@@ -1,0 +1,3 @@
+semantic error: Undeclared identifier 'y'
+  --> 2:13
+  context: in function 'test'
