@@ -1,15 +1,14 @@
 package com.scammers;
 
+import ir.IRGenerator;
+import ir.IRProgram;
 import lexer.Scanner;
 import lexer.Token;
 import lexer.TokenType;
 import parser.Parser;
 import parser.ast.ProgramNode;
 import semantic.SemanticAnalyzer;
-import utils.ASTPrettyPrinter;
-import utils.ASTDotGenerator;
-import utils.TypeAnnotatedPrinter;
-import utils.ValidationReport;
+import utils.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,6 +25,9 @@ public class Main {
         boolean showTypes = false;
         boolean showSymbols = false;
         boolean showReport = false;
+        boolean generateIR = false;
+        String irFormat = "text";
+        String irOutput = null;
 
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
@@ -36,6 +38,9 @@ public class Main {
                 case "--show-types": showTypes = true; break;
                 case "--show-symbols": showSymbols = true; break;
                 case "--show-report": showReport = true; break;
+                case "--ir": generateIR = true; break;
+                case "--it-format": irFormat = args[++i]; break;
+                case "--it-output": irOutput = args[++i]; break;
                 default:
                     if (!args[i].startsWith("--")) inputFile = args[i];
             }
@@ -111,6 +116,25 @@ public class Main {
                 if (verbose) System.err.println("Output written to " + outputFile);
             } else {
                 System.out.println(output);
+            }
+
+            if (generateIR) {
+                IRGenerator irGen = new IRGenerator();
+                IRProgram irProgram = irGen.generate(program);
+                String irResult;
+                switch (irFormat) {
+                    case "dot":
+                        irResult = new IRDotGenerator().generate(irProgram);
+                        break;
+                    default:
+                        irResult = irProgram.toString();
+                }
+                if (irOutput != null) {
+                    Files.writeString(Paths.get(irOutput), irResult);
+                    if (verbose) System.err.println("IR written to " + irOutput);
+                } else {
+                    System.out.println(irResult);
+                }
             }
         } catch (IOException e) {
             System.err.println("Error: " + e.getMessage());
