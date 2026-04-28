@@ -39,8 +39,8 @@ public class Main {
                 case "--show-symbols": showSymbols = true; break;
                 case "--show-report": showReport = true; break;
                 case "--ir": generateIR = true; break;
-                case "--it-format": irFormat = args[++i]; break;
-                case "--it-output": irOutput = args[++i]; break;
+                case "--ir-format": irFormat = args[++i]; break;
+                case "--ir-output": irOutput = args[++i]; break;
                 default:
                     if (!args[i].startsWith("--")) inputFile = args[i];
             }

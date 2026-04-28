@@ -1,0 +1,4 @@
+fn test() -> void {
+    int x = 10;
+    int y = x + 1;
+}

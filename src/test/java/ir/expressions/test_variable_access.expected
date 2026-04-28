@@ -1,0 +1,7 @@
+function test: void ()
+entry:
+    STORE [x], 10
+    t0 = LOAD [x]
+    t1 = ADD t0, 1
+    STORE [y], t1
+    RETURN

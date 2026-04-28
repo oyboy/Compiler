@@ -1,0 +1,9 @@
+function log: void ()
+entry:
+    STORE [x], 1
+    RETURN
+
+function main: void ()
+entry:
+    CALL log, 0
+    RETURN

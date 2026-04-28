@@ -1,0 +1,11 @@
+function square: int (int n)
+entry:
+    t0 = MUL n, n
+    RETURN t0
+
+function test: void ()
+entry:
+    PARAM 0, 5
+    t0 = CALL square, 1
+    STORE [x], t0
+    RETURN

@@ -1,0 +1,6 @@
+function test: void ()
+entry:
+    STORE [a], 42
+    STORE [b], 3.14
+    STORE [c], true
+    RETURN

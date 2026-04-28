@@ -1,0 +1,4 @@
+function greet: void ()
+entry:
+    STORE [x], 1
+    RETURN

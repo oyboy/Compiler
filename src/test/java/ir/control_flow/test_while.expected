@@ -1,0 +1,16 @@
+function test: void ()
+entry:
+    STORE [x], 10
+    JUMP L_loop
+L_loop:
+    t0 = LOAD [x]
+    t1 = CMP_GT t0, 0
+    JUMP_IF t1, L_body
+    JUMP L_endloop
+L_body:
+    t2 = LOAD [x]
+    t3 = SUB t2, 1
+    STORE [x], t3
+    JUMP L_loop
+L_endloop:
+    RETURN

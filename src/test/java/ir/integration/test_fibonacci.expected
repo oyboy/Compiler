@@ -1,0 +1,20 @@
+function fib: int (int n)
+entry:
+    t0 = CMP_LE n, 1
+    JUMP_IF t0, L_true
+    JUMP L_endif
+L_true:
+    RETURN n
+L_endif:
+    t1 = SUB n, 1
+    PARAM 0, t1
+    t2 = CALL fib, 1
+    STORE [a], t2
+    t3 = SUB n, 2
+    PARAM 0, t3
+    t4 = CALL fib, 1
+    STORE [b], t4
+    t5 = LOAD [a]
+    t6 = LOAD [b]
+    t7 = ADD t5, t6
+    RETURN t7

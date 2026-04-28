@@ -1,0 +1,4 @@
+function add: int (int a, int b)
+entry:
+    t0 = ADD a, b
+    RETURN t0

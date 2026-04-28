@@ -4,7 +4,6 @@ import parser.ast.*;
 import parser.ast.decl.*;
 import parser.ast.expr.*;
 import parser.ast.stmt.*;
-import semantic.Symbol;
 import semantic.Type;
 import utils.ASTVisitor;
 
@@ -260,24 +259,32 @@ public class IRGenerator implements ASTVisitor<Operand> {
 
     @Override
     public Operand visit(LiteralExprNode node) {
-        switch (node.literalType) {
-            case "int": return new Operand.IntLiteral(((Number) node.value).intValue());
-            case "float": return new Operand.FloatLiteral(((Number) node.value).doubleValue());
-            case "bool": return new Operand.BoolLiteral((Boolean) node.value);
-            default: return new Operand.Variable("\"" + node.value + "\"");
-        }
+        return switch (node.literalType) {
+            case "int" -> new Operand.IntLiteral(((Number) node.value).intValue());
+            case "float" -> new Operand.FloatLiteral(((Number) node.value).doubleValue());
+            case "bool" -> new Operand.BoolLiteral((Boolean) node.value);
+            default -> new Operand.Variable("\"" + node.value + "\"");
+        };
     }
 
     @Override
     public Operand visit(IdentifierExprNode node) {
-        if (node.resolvedSymbol != null && node.resolvedSymbol.kind == Symbol.Kind.PARAMETER) {
-            return new Operand.Variable(node.name);
+        if (isParameter(node.name)) {
+            return new Operand.Parameter(node.name);
         }
 
         Operand.Variable var = new Operand.Variable(node.name);
         Operand.Temporary dest = newTemp();
         emit(new Instruction.Load(dest, var));
         return dest;
+    }
+    private boolean isParameter(String name) {
+        if (currentFunction == null) return false;
+        for (String param : currentFunction.paramNames) {
+            String paramName = param.substring(param.lastIndexOf(' ') + 1);
+            if (paramName.equals(name)) return true;
+        }
+        return false;
     }
 
     @Override

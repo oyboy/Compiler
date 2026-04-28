@@ -1,0 +1,13 @@
+function factorial: int (int n)
+entry:
+    t0 = CMP_LE n, 1
+    JUMP_IF t0, L_true
+    JUMP L_false
+L_true:
+    RETURN 1
+L_false:
+    t1 = SUB n, 1
+    PARAM 0, t1
+    t2 = CALL factorial, 1
+    t3 = MUL n, t2
+    RETURN t3

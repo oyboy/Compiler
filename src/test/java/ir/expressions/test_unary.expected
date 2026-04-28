@@ -1,0 +1,7 @@
+function test: void ()
+entry:
+    t0 = NEG 5
+    STORE [x], t0
+    t1 = NOT true
+    STORE [y], t1
+    RETURN

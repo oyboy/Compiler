@@ -1,0 +1,7 @@
+fn log() -> void {
+    int x = 1;
+}
+
+fn main() -> void {
+    log();
+}

@@ -1,7 +1,6 @@
 package ir;
 
 public abstract class Operand {
-
     public static class Temporary extends Operand {
         public final int id;
         public Temporary(int id) { this.id = id; }
@@ -37,10 +36,11 @@ public abstract class Operand {
         @Override public String toString() { return String.valueOf(value); }
     }
 
-    public static class Label extends Operand {
+    public static class Parameter extends Operand {
         public final String name;
-        public Label(String name) { this.name = name; }
+        public Parameter(String name) { this.name = name; }
 
-        @Override public String toString() { return name; }
+        @Override
+        public String toString() { return name; }
     }
 }

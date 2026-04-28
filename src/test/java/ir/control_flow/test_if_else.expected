@@ -1,0 +1,16 @@
+function test: void ()
+entry:
+    STORE [x], 5
+    STORE [y], 0
+    t0 = LOAD [x]
+    t1 = CMP_GT t0, 3
+    JUMP_IF t1, L_true
+    JUMP L_false
+L_true:
+    STORE [y], 1
+    JUMP L_endif
+L_false:
+    STORE [y], 2
+    JUMP L_endif
+L_endif:
+    RETURN

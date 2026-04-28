@@ -1,0 +1,5 @@
+function test: void ()
+entry:
+    STORE [x], 0
+    STORE [x], 5
+    RETURN

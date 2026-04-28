@@ -17,7 +17,6 @@ public class IRProgram {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("=== IR Program ===\n\n");
         for (IRFunction func : functions.values()) {
             sb.append(func.toString()).append("\n");
         }

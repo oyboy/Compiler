@@ -1,0 +1,22 @@
+function sumTo: int (int n)
+entry:
+    STORE [total], 0
+    STORE [i], 1
+    JUMP L_loop
+L_loop:
+    t0 = LOAD [i]
+    t1 = CMP_LE t0, n
+    JUMP_IF t1, L_body
+    JUMP L_endloop
+L_body:
+    t2 = LOAD [total]
+    t3 = LOAD [i]
+    t4 = ADD t2, t3
+    STORE [total], t4
+    t5 = LOAD [i]
+    t6 = ADD t5, 1
+    STORE [i], t6
+    JUMP L_loop
+L_endloop:
+    t7 = LOAD [total]
+    RETURN t7

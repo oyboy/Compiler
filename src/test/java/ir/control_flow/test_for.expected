@@ -1,0 +1,21 @@
+function test: void ()
+entry:
+    STORE [sum], 0
+    STORE [i], 0
+    JUMP L_for
+L_for:
+    t0 = LOAD [i]
+    t1 = CMP_LT t0, 5
+    JUMP_IF t1, L_forbody
+    JUMP L_endfor
+L_forbody:
+    t2 = LOAD [sum]
+    t3 = LOAD [i]
+    t4 = ADD t2, t3
+    STORE [sum], t4
+    t5 = LOAD [i]
+    t6 = ADD t5, 1
+    STORE [i], t6
+    JUMP L_for
+L_endfor:
+    RETURN

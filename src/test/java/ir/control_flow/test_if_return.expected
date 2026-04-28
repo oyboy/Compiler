@@ -1,0 +1,9 @@
+function test: int (int x)
+entry:
+    t0 = CMP_GT x, 0
+    JUMP_IF t0, L_true
+    JUMP L_false
+L_true:
+    RETURN 1
+L_false:
+    RETURN 0
