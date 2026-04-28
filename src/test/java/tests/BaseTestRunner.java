@@ -12,7 +12,7 @@ public abstract class BaseTestRunner {
     protected int passed = 0;
     protected int failed = 0;
 
-    protected abstract String getActualOutput(String source, boolean isErrorTest) throws Exception;
+    protected abstract String getActualOutput(String source, boolean isErrorTest, File srcFile) throws Exception;
 
     protected abstract String getExpectedExtension();
 
@@ -65,7 +65,7 @@ public abstract class BaseTestRunner {
 
         try {
             String source = Files.readString(srcFile.toPath());
-            String actual = getActualOutput(source, isErrorTest);
+            String actual = getActualOutput(source, isErrorTest, srcFile);
 
             if (actual == null) {
                 failed++;

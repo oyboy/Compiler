@@ -1,2 +1,2 @@
 semantic error: Function 'foo' is already declared
-  --> 2:1
+  --> test_duplicate_function.src:2:1

@@ -2,6 +2,8 @@ package lexer;
 
 import tests.BaseTestRunner;
 
+import java.io.File;
+
 public class LexerTestRunner extends BaseTestRunner {
 
     @Override
@@ -15,7 +17,7 @@ public class LexerTestRunner extends BaseTestRunner {
     }
 
     @Override
-    protected String getActualOutput(String source, boolean isErrorTest) {
+    protected String getActualOutput(String source, boolean isErrorTest, File file) {
         Scanner scanner = new Scanner(source);
         StringBuilder sb = new StringBuilder();
 

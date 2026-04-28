@@ -71,7 +71,7 @@ public class Main {
                 parser.getErrors().forEach(e -> System.err.println("  " + e));
             }
 
-            SemanticAnalyzer analyzer = new SemanticAnalyzer();
+            SemanticAnalyzer analyzer = new SemanticAnalyzer("main");
             analyzer.analyze(program);
 
             if (showReport) {

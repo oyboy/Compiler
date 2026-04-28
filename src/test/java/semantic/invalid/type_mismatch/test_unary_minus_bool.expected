@@ -1,3 +1,3 @@
 semantic error: Unary '-' requires numeric type, got 'bool'
-  --> 2:13
+  --> test_unary_minus_bool.src:2:13
   context: in function 'test'

@@ -20,12 +20,14 @@ public class SemanticError {
     public final ErrorType errorType;
     public final String message;
     public final String context;
+    public final String filename;
     public final int line;
     public final int column;
 
-    public SemanticError(ErrorType errorType, String message, String context, int line, int column) {
+    public SemanticError(ErrorType errorType, String message, String filename, String context, int line, int column) {
         this.errorType = errorType;
         this.message = message;
+        this.filename = filename;
         this.context = context;
         this.line = line;
         this.column = column;
@@ -35,7 +37,13 @@ public class SemanticError {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("semantic error: ").append(message).append("\n");
-        sb.append("  --> ").append(line).append(":").append(column).append("\n");
+
+        if (filename != null && !filename.isEmpty()) {
+            sb.append("  --> ").append(filename).append(":").append(line).append(":").append(column).append("\n");
+        } else {
+            sb.append("  --> ").append(line).append(":").append(column).append("\n");
+        }
+
         if (context != null && !context.isEmpty()) {
             sb.append("  context: ").append(context).append("\n");
         }

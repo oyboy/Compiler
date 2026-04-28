@@ -14,6 +14,15 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
 
     private String currentFunctionName = null;
     private Type currentFunctionReturnType = null;
+    private final String filename;
+
+    public SemanticAnalyzer() {
+        this.filename = null;
+    }
+
+    public SemanticAnalyzer(String filename) {
+        this.filename = filename;
+    }
 
     public void analyze(ProgramNode program) {
         for (DeclarationNode decl : program.declarations) {
@@ -491,7 +500,7 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
     }
 
     private void error(SemanticError.ErrorType type, String message, String context, int line, int column) {
-        errors.add(new SemanticError(type, message, context, line, column));
+        errors.add(new SemanticError(type, message, filename, context, line, column));
     }
 
     private String currentContext() {

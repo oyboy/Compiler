@@ -7,6 +7,7 @@ import parser.ast.ProgramNode;
 import tests.BaseTestRunner;
 import utils.ASTPrettyPrinter;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +24,7 @@ public class ParserTestRunner extends BaseTestRunner {
     }
 
     @Override
-    protected String getActualOutput(String source, boolean isErrorTest) {
+    protected String getActualOutput(String source, boolean isErrorTest, File file) {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = new ArrayList<>();
         Token t;

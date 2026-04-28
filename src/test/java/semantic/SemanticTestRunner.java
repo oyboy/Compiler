@@ -7,6 +7,7 @@ import parser.Parser;
 import parser.ast.ProgramNode;
 import tests.BaseTestRunner;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +20,7 @@ public class SemanticTestRunner extends BaseTestRunner {
     protected String getExpectedExtension() { return ".expected"; }
 
     @Override
-    protected String getActualOutput(String source, boolean isErrorTest) {
+    protected String getActualOutput(String source, boolean isErrorTest, File srcFile) {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = new ArrayList<>();
         Token t;
@@ -37,7 +38,7 @@ public class SemanticTestRunner extends BaseTestRunner {
             return null;
         }
 
-        SemanticAnalyzer analyzer = new SemanticAnalyzer();
+        SemanticAnalyzer analyzer = new SemanticAnalyzer(srcFile.getName());
         analyzer.analyze(program);
 
         if (isErrorTest) {
