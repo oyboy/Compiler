@@ -1,0 +1,10 @@
+fn main() -> int {
+    bool t = true;
+    bool f = false;
+    if (t && !f) {
+        if (f || 5 > 2) {
+            return 1;
+        }
+    }
+    return 0;
+}

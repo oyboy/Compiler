@@ -1,5 +1,6 @@
 package com.scammers;
 
+import codegen.X86Generator;
 import ir.IRGenerator;
 import ir.IRProgram;
 import lexer.Scanner;
@@ -28,6 +29,8 @@ public class Main {
         boolean generateIR = false;
         String irFormat = "text";
         String irOutput = null;
+        boolean generateAsm = false;
+        String asmOutput = null;
 
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
@@ -41,6 +44,8 @@ public class Main {
                 case "--ir": generateIR = true; break;
                 case "--ir-format": irFormat = args[++i]; break;
                 case "--ir-output": irOutput = args[++i]; break;
+                case "--asm": generateAsm = true; break;
+                case "--asm-output": asmOutput = args[++i]; break;
                 default:
                     if (!args[i].startsWith("--")) inputFile = args[i];
             }
@@ -135,6 +140,15 @@ public class Main {
                 } else {
                     System.out.println(irResult);
                 }
+            }
+
+            if (generateAsm) {
+                IRGenerator irGen = new IRGenerator();
+                IRProgram irProgram = irGen.generate(program);
+                X86Generator x86Gen = new X86Generator();
+                String assembly = x86Gen.generate(irProgram);
+                Files.writeString(Paths.get(asmOutput), assembly);
+                System.out.println("Assembly generated: " + asmOutput);
             }
         } catch (IOException e) {
             System.err.println("Error: " + e.getMessage());

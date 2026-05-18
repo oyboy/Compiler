@@ -1,0 +1,7 @@
+fn double(int n) -> int { return n * 2; }
+fn addOne(int n) -> int { return n + 1; }
+
+fn main() -> int {
+    // addOne(double(5)) = addOne(10) = 11
+    return addOne(double(5));
+}

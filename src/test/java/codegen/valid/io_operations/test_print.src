@@ -1,0 +1,5 @@
+fn main() -> int {
+    int x = 12345;
+    print_int(x);
+    return 0;
+}
