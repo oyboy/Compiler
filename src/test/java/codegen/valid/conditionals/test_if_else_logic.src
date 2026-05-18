@@ -1,0 +1,10 @@
+fn main() -> int {
+    int x = 10;
+    int res = 0;
+    if (x > 20) {
+        res = 1;
+    } else {
+        res = 2;
+    }
+    return res;
+}

@@ -1,0 +1,9 @@
+fn main() -> int {
+    int a = 5; int b = 10;
+    if (a == 5) {
+        if (b == 10) {
+            return 100;
+        }
+    }
+    return 0;
+}

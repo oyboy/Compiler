@@ -289,18 +289,58 @@ public class IRGenerator implements ASTVisitor<Operand> {
 
     @Override
     public Operand visit(BinaryExprNode node) {
+        String op = node.operator.lexeme;
+
+        if (op.equals("&&")) {
+            String rightLabel = newLabel("and_right");
+            String endLabel = newLabel("and_end");
+            Operand.Temporary result = newTemp();
+
+            Operand left = node.left.accept(this);
+            emit(new Instruction.JumpIf(left, rightLabel));
+            emit(new Instruction.Move(result, new Operand.BoolLiteral(false)));
+            emit(new Instruction.Jump(endLabel));
+
+            startBlock(rightLabel);
+            Operand right = node.right.accept(this);
+            emit(new Instruction.Move(result, right));
+            emit(new Instruction.Jump(endLabel));
+
+            startBlock(endLabel);
+            return result;
+        }
+
+        if (op.equals("||")) {
+            String trueLabel = newLabel("or_true");
+            String rightLabel = newLabel("or_right");
+            String endLabel = newLabel("or_end");
+            Operand.Temporary result = newTemp();
+
+            Operand left = node.left.accept(this);
+            emit(new Instruction.JumpIf(left, trueLabel));
+
+            startBlock(rightLabel);
+            Operand right = node.right.accept(this);
+            emit(new Instruction.Move(result, right));
+            emit(new Instruction.Jump(endLabel));
+
+            startBlock(trueLabel);
+            emit(new Instruction.Move(result, new Operand.BoolLiteral(true)));
+            emit(new Instruction.Jump(endLabel));
+
+            startBlock(endLabel);
+            return result;
+        }
+
         Operand left = node.left.accept(this);
         Operand right = node.right.accept(this);
         Operand.Temporary dest = newTemp();
-
         switch (node.operator.lexeme) {
             case "+": emit(new Instruction.BinaryOp(dest, Instruction.BinaryOp.Op.ADD, left, right)); break;
             case "-": emit(new Instruction.BinaryOp(dest, Instruction.BinaryOp.Op.SUB, left, right)); break;
             case "*": emit(new Instruction.BinaryOp(dest, Instruction.BinaryOp.Op.MUL, left, right)); break;
             case "/": emit(new Instruction.BinaryOp(dest, Instruction.BinaryOp.Op.DIV, left, right)); break;
             case "%": emit(new Instruction.BinaryOp(dest, Instruction.BinaryOp.Op.MOD, left, right)); break;
-            case "&&": emit(new Instruction.BinaryOp(dest, Instruction.BinaryOp.Op.AND, left, right)); break;
-            case "||": emit(new Instruction.BinaryOp(dest, Instruction.BinaryOp.Op.OR, left, right)); break;
             case "==": emit(new Instruction.Compare(dest, Instruction.Compare.Op.EQ, left, right)); break;
             case "!=": emit(new Instruction.Compare(dest, Instruction.Compare.Op.NE, left, right)); break;
             case "<": emit(new Instruction.Compare(dest, Instruction.Compare.Op.LT, left, right)); break;

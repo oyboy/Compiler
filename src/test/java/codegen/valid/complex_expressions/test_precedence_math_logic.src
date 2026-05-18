@@ -1,0 +1,6 @@
+fn main() -> int {
+    if (5 + 5 == 10 && 2 * 2 < 5) {
+        return 77;
+    }
+    return 0;
+}
