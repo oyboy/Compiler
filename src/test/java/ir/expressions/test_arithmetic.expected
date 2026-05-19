@@ -1,6 +1,4 @@
 function test: void ()
 entry:
-    t0 = MUL 3, 4
-    t1 = ADD 2, t0
-    STORE [x], t1
+    STORE [x], 14
     RETURN

@@ -1,7 +1,5 @@
 function test: void ()
 entry:
-    t0 = CMP_LT 1, 2
-    STORE [a], t0
-    t1 = CMP_EQ 3, 3
-    STORE [b], t1
+    STORE [a], true
+    STORE [b], true
     RETURN

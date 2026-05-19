@@ -1,0 +1,6 @@
+function main: int ()
+entry:
+    STORE [x], 2
+    t0 = LOAD [x]
+    t1 = ADD t0, 12
+    RETURN t1

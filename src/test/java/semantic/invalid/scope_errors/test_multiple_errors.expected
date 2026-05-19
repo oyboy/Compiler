@@ -2,7 +2,7 @@ semantic error: Undeclared identifier 'undeclared'
   --> test_multiple_errors.src:2:13
   context: in function 'test'
 semantic error: Cannot assign 'int' to variable of type 'bool'
-  --> test_multiple_errors.src:3:10
+  --> test_multiple_errors.src:3:14
   context: in function 'test'
 semantic error: Undeclared function 'foo'
   --> test_multiple_errors.src:4:13
