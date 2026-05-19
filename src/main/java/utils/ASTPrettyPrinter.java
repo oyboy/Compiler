@@ -214,4 +214,14 @@ public class ASTPrettyPrinter implements ASTVisitor<String> {
                 .collect(Collectors.joining(", "));
         return node.callee.accept(this) + "(" + args + ")";
     }
+
+    @Override
+    public String visit(ArrayIndexExprNode node) {
+        return node.arrayName + "[" + node.index.accept(this) + "]";
+    }
+
+    @Override
+    public String visit(StmtWrapper node) {
+        return node.statement.accept(this);
+    }
 }

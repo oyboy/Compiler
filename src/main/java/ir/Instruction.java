@@ -201,4 +201,38 @@ public abstract class Instruction {
             return value != null ? "RETURN " + value + commentStr() : "RETURN" + commentStr();
         }
     }
+
+    public static class LoadIndex extends Instruction {
+        public final Operand dest;
+        public final String arrayName;
+        public final Operand index;
+
+        public LoadIndex(Operand dest, String arrayName, Operand index) {
+            this.dest = dest;
+            this.arrayName = arrayName;
+            this.index = index;
+        }
+
+        @Override
+        public String toString() {
+            return dest + " = LOAD_INDEX " + arrayName + ", " + index + commentStr();
+        }
+    }
+
+    public static class StoreIndex extends Instruction {
+        public final String arrayName;
+        public final Operand index;
+        public final Operand src;
+
+        public StoreIndex(String arrayName, Operand index, Operand src) {
+            this.arrayName = arrayName;
+            this.index = index;
+            this.src = src;
+        }
+
+        @Override
+        public String toString() {
+            return "STORE_INDEX " + arrayName + ", " + index + ", " + src + commentStr();
+        }
+    }
 }

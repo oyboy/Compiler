@@ -2,6 +2,8 @@ package codegen;
 
 import ir.*;
 
+import java.util.List;
+
 public class X86Generator {
     private final StringBuilder asm = new StringBuilder();
     private StackFrame currentFrame;
@@ -60,18 +62,36 @@ public class X86Generator {
     }
 
     private void preprocessStack(IRFunction func) {
+        for (String v : func.variables.keySet()) {
+            if (v.contains("$size$")) {
+                String[] parts = v.split("\\$size\\$");
+                String name = parts[0];
+                int size = Integer.parseInt(parts[1]);
+                currentFrame.allocateArray(name, size);
+            } else {
+                currentFrame.allocate(v);
+            }
+        }
+
         for (BasicBlock b : func.blocks) {
             for (Instruction i : b.instructions) {
                 if (i instanceof Instruction.BinaryOp) currentFrame.allocate(((Instruction.BinaryOp) i).dest.toString());
                 if (i instanceof Instruction.UnaryOp)  currentFrame.allocate(((Instruction.UnaryOp) i).dest.toString());
                 if (i instanceof Instruction.Compare)  currentFrame.allocate(((Instruction.Compare) i).dest.toString());
                 if (i instanceof Instruction.Load)     currentFrame.allocate(((Instruction.Load) i).dest.toString());
+                if (i instanceof Instruction.Move op) currentFrame.allocate(op.dest.toString());
+                if (i instanceof Instruction.LoadIndex) currentFrame.allocate(((Instruction.LoadIndex) i).dest.toString());
                 if (i instanceof Instruction.Call && ((Instruction.Call) i).dest != null)
                     currentFrame.allocate(((Instruction.Call) i).dest.toString());
             }
         }
-        for (String var : func.variables.keySet()) currentFrame.allocate("[" + var + "]");
-        for (String p : func.paramNames) currentFrame.allocate(p.split(" ")[1]);
+/*
+        for (BasicBlock b : func.blocks) {
+            for (Instruction i : b.instructions) {
+                extractAndAllocateTemporaries(i);
+            }
+        }
+        for (String p : func.paramNames) currentFrame.allocate(p.split(" ")[1]);*/
     }
 
     private void translate(Instruction instr) {
@@ -111,6 +131,22 @@ public class X86Generator {
             asm.append("    mov rax, ").append(currentFrame.getAddress(l.addr)).append("\n");
             asm.append("    mov ").append(currentFrame.getAddress(l.dest)).append(", rax\n");
 
+        } else if (instr instanceof Instruction.LoadIndex) {
+            Instruction.LoadIndex li = (Instruction.LoadIndex) instr;
+            asm.append("    mov r11, ").append(currentFrame.getAddress(li.index)).append("\n");
+            asm.append("    shl r11, 3\n");
+            asm.append("    mov r10, rbp\n");
+            asm.append("    sub r10, ").append(currentFrame.getArrayOffset(li.arrayName)).append("\n");
+            asm.append("    mov rax, [r10 + r11]\n");
+            asm.append("    mov ").append(currentFrame.getAddress(li.dest)).append(", rax\n");
+        } else if (instr instanceof Instruction.StoreIndex) {
+            Instruction.StoreIndex si = (Instruction.StoreIndex) instr;
+            asm.append("    mov r11, ").append(currentFrame.getAddress(si.index)).append("\n");
+            asm.append("    shl r11, 3\n");
+            asm.append("    mov r10, rbp\n");
+            asm.append("    sub r10, ").append(currentFrame.getArrayOffset(si.arrayName)).append("\n");
+            asm.append("    mov rax, ").append(currentFrame.getAddress(si.src)).append("\n");
+            asm.append("    mov [r10 + r11], rax\n");
         } else if (instr instanceof Instruction.JumpIf) {
             Instruction.JumpIf j = (Instruction.JumpIf) instr;
             asm.append("    mov rax, ").append(currentFrame.getAddress(j.condition)).append("\n");
@@ -125,6 +161,9 @@ public class X86Generator {
             asm.append("    mov ").append(ABI.ARG_REGISTERS[p.index]).append(", ").append(currentFrame.getAddress(p.value)).append("\n");
         } else if (instr instanceof Instruction.Call) {
             Instruction.Call c = (Instruction.Call) instr;
+            if (isExternal(c.funcName)) {
+                asm.append("    xor rax, rax\n");
+            }
             asm.append("    call ").append(c.funcName).append("\n");
             if (c.dest != null) asm.append("    mov ").append(currentFrame.getAddress(c.dest)).append(", rax\n");
 
@@ -161,5 +200,9 @@ public class X86Generator {
         asm.append("    ").append(setInstr).append(" al\n");
         asm.append("    movzx rax, al\n");
         asm.append("    mov ").append(currentFrame.getAddress(c.dest)).append(", rax\n");
+    }
+    private boolean isExternal(String name) {
+        List<String> externals = List.of("printf", "scanf", "malloc", "free", "sqrt", "pow", "strlen");
+        return externals.contains(name);
     }
 }

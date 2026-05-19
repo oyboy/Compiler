@@ -110,15 +110,15 @@ public class IRGenerator implements ASTVisitor<Operand> {
     }
 
     @Override
-    public Operand visit(VarDeclStmtNode node) {
-        if (currentFunction == null || currentBlock == null) return null;
-
-        Operand.Variable var = new Operand.Variable(node.name);
-        currentFunction.variables.put(node.name, var);
-
-        if (node.initializer != null) {
-            Operand value = node.initializer.accept(this);
-            emit(new Instruction.Store(var, value));
+    public Operand visit(VarDeclStmtNode n) {
+        if (n.size >= 0) {
+            currentFunction.variables.put(n.name + "$size$" + n.size, new Operand.Variable(n.name));
+            return null;
+        }
+        currentFunction.variables.put(n.name, new Operand.Variable(n.name));
+        if (n.initializer != null) {
+            Operand val = n.initializer.accept(this);
+            emit(new Instruction.Store(new Operand.Variable(n.name), val));
         }
         return null;
     }
@@ -291,15 +291,13 @@ public class IRGenerator implements ASTVisitor<Operand> {
 
     @Override
     public Operand visit(IdentifierExprNode node) {
-        if (isParameter(node.name)) {
-            return new Operand.Parameter(node.name);
-        }
-
+        if (isParameter(node.name)) return new Operand.Parameter(node.name);
         Operand.Variable var = new Operand.Variable(node.name);
         Operand.Temporary dest = newTemp();
         emit(new Instruction.Load(dest, var));
         return dest;
     }
+
     private boolean isParameter(String name) {
         if (currentFunction == null) return false;
         for (String param : currentFunction.paramNames) {
@@ -356,6 +354,17 @@ public class IRGenerator implements ASTVisitor<Operand> {
 
         Operand left = node.left.accept(this);
         Operand right = node.right.accept(this);
+
+        Instruction.BinaryOp.Op irOp = mapToIrOp(op);
+        Instruction.Compare.Op cmpOp = mapToCmpOp(op);
+        if (irOp != null) {
+            Operand folded = IROptimizer.foldBinary(irOp, left, right);
+            if (folded != null) return folded;
+        } else if (cmpOp != null) {
+            Operand folded = IROptimizer.foldCompare(cmpOp, left, right);
+            if (folded != null) return folded;
+        }
+
         Operand.Temporary dest = newTemp();
         switch (node.operator.lexeme) {
             case "+": emit(new Instruction.BinaryOp(dest, Instruction.BinaryOp.Op.ADD, left, right)); break;
@@ -372,6 +381,30 @@ public class IRGenerator implements ASTVisitor<Operand> {
             default: emit(new Instruction.Move(dest, left));
         }
         return dest;
+    }
+
+    private Instruction.BinaryOp.Op mapToIrOp(String op) {
+        return switch (op) {
+            case "+" -> Instruction.BinaryOp.Op.ADD;
+            case "-" -> Instruction.BinaryOp.Op.SUB;
+            case "*" -> Instruction.BinaryOp.Op.MUL;
+            case "/" -> Instruction.BinaryOp.Op.DIV;
+            case "%" -> Instruction.BinaryOp.Op.MOD;
+            case "&&" -> Instruction.BinaryOp.Op.AND;
+            case "||" -> Instruction.BinaryOp.Op.OR;
+            default -> null;
+        };
+    }
+    private Instruction.Compare.Op mapToCmpOp(String op) {
+        return switch (op) {
+            case "==" -> Instruction.Compare.Op.EQ;
+            case "!=" -> Instruction.Compare.Op.NE;
+            case "<"  -> Instruction.Compare.Op.LT;
+            case "<=" -> Instruction.Compare.Op.LE;
+            case ">"  -> Instruction.Compare.Op.GT;
+            case ">=" -> Instruction.Compare.Op.GE;
+            default -> null;
+        };
     }
 
     @Override
@@ -394,11 +427,19 @@ public class IRGenerator implements ASTVisitor<Operand> {
     @Override
     public Operand visit(AssignmentExprNode node) {
         Operand value = node.value.accept(this);
-        String varName = ((IdentifierExprNode) node.target).name;
-        Operand.Variable var = new Operand.Variable(varName);
-        currentFunction.variables.put(varName, var);
-        emit(new Instruction.Store(var, value));
+        if (node.target instanceof IdentifierExprNode) {
+            String varName = ((IdentifierExprNode) node.target).name;
+            emit(new Instruction.Store(new Operand.Variable(varName), value));
+        } else if (node.target instanceof ArrayIndexExprNode arrayIdx) {
+            Operand index = arrayIdx.index.accept(this);
+            emit(new Instruction.StoreIndex(arrayIdx.arrayName, index, value));
+        }
         return value;
+    }
+
+    @Override
+    public Operand visit(StmtWrapper node) {
+        return node.statement.accept(this);
     }
 
     @Override
@@ -413,6 +454,15 @@ public class IRGenerator implements ASTVisitor<Operand> {
         boolean isVoid = node.resolvedType == null || node.resolvedType == Type.VOID;
         Operand.Temporary dest = isVoid ? null : newTemp();
         emit(new Instruction.Call(dest, funcName, node.arguments.size()));
+        return dest;
+    }
+
+    @Override
+    public Operand visit(ArrayIndexExprNode node) {
+        Operand index = node.index.accept(this);
+        Operand.Temporary dest = newTemp();
+
+        emit(new Instruction.LoadIndex(dest, node.arrayName, index));
         return dest;
     }
 }

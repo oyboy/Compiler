@@ -138,4 +138,14 @@ public class AstPrinter implements ASTVisitor<String> {
         if (args.isEmpty()) return "(call " + calleeName + ")";
         return "(call " + calleeName + " " + args + ")";
     }
+
+    @Override
+    public String visit(ArrayIndexExprNode node) {
+        return "(index " + node.arrayName + " " + node.index.accept(this) + ")";
+    }
+
+    @Override
+    public String visit(StmtWrapper node) {
+        return node.statement.accept(this);
+    }
 }

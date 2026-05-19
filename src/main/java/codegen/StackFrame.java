@@ -8,10 +8,26 @@ public class StackFrame {
     private final Map<String, Integer> offsets = new HashMap<>();
     private int currentOffset = 0;
 
+    private String cleanKey(String key) {
+        if (key.startsWith("[") && key.endsWith("]")) {
+            return key.substring(1, key.length() - 1);
+        }
+        return key;
+    }
+
     public void allocate(String identifier) {
-        if (!offsets.containsKey(identifier)) {
+        String key = cleanKey(identifier);
+        if (!offsets.containsKey(key)) {
             currentOffset += 8;
-            offsets.put(identifier, currentOffset);
+            offsets.put(key, currentOffset);
+        }
+    }
+
+    public void allocateArray(String name, int size) {
+        String key = cleanKey(name);
+        if (!offsets.containsKey(key)) {
+            currentOffset += (size * 8);
+            offsets.put(key, currentOffset);
         }
     }
 
@@ -19,20 +35,23 @@ public class StackFrame {
         if (op instanceof Operand.IntLiteral) return String.valueOf(((Operand.IntLiteral) op).value);
         if (op instanceof Operand.BoolLiteral) return ((Operand.BoolLiteral) op).value ? "1" : "0";
         if (op instanceof Operand.Parameter) {
-            Integer offset = offsets.get(((Operand.Parameter) op).name);
-            return "[rbp - " + offset + "]";
+            return "[rbp - " + offsets.get(cleanKey(((Operand.Parameter) op).name)) + "]";
         }
 
-        String key = op.toString();
+        String key = cleanKey(op.toString());
         Integer offset = offsets.get(key);
         if (offset == null) {
-            allocate(key);
-            offset = offsets.get(key);
+            throw new RuntimeException("Missing stack allocation for: " + key);
         }
         return "[rbp - " + offset + "]";
     }
 
+    public int getArrayOffset(String name) {
+        Integer offset = offsets.get(cleanKey(name));
+        return (offset != null) ? offset : 0;
+    }
+
     public int getPaddedSize() {
-        return (currentOffset + ABI.STACK_ALIGNMENT - 1) & ~(ABI.STACK_ALIGNMENT - 1);
+        return (currentOffset + 15) & ~15;
     }
 }

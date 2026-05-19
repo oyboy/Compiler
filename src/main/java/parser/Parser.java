@@ -40,11 +40,18 @@ public class Parser {
     }
 
     private DeclarationNode declaration() {
-        if (match(KW_FN)) return functionDecl();
-        if (match(KW_STRUCT)) return structDecl();
-        if (isVarDeclaration()) return varDeclAsDeclaration();
-
-        throw error(peek(), "Expect declaration (fn, struct, or variable).");
+        try {
+            if (match(KW_FN)) return functionDecl();
+            if (match(KW_STRUCT)) return structDecl();
+            if (isVarDeclaration()) {
+                VarDeclStmtNode vd = (VarDeclStmtNode) varDecl();
+                return new VarDeclWrapper(vd, vd.line, vd.column);
+            }
+            if (check(RBRACE) || isAtEnd()) {
+                throw error(peek(), "Expect declaration (fn, struct, or variable).");
+            }
+            return new StmtWrapper(statement(), peek().line, peek().column);
+        } catch (ParseError e) { synchronize(); return null; }
     }
 
     private FunctionDeclNode functionDecl() {
@@ -80,27 +87,11 @@ public class Parser {
 
         List<VarDeclStmtNode> fields = new ArrayList<>();
         while (!check(RBRACE) && !isAtEnd()) {
-            fields.add(varDeclStmt());
+            fields.add((VarDeclStmtNode) varDecl());
         }
         consume(RBRACE, "Expect '}' after struct body.");
 
         return new StructDeclNode(nameToken.lexeme, fields, structToken.line, structToken.column);
-    }
-
-    private DeclarationNode varDeclAsDeclaration() {
-        VarDeclStmtNode varDecl = varDeclStmt();
-        return new VarDeclWrapper(varDecl, varDecl.line, varDecl.column);
-    }
-
-    private VarDeclStmtNode varDeclStmt() {
-        String type = parseTypeName();
-        Token nameToken = consume(IDENTIFIER, "Expect variable name.");
-        ExpressionNode initializer = null;
-        if (match(OP_ASSIGN)) {
-            initializer = expression();
-        }
-        consume(SEMICOLON, "Expect ';' after variable declaration.");
-        return new VarDeclStmtNode(type, nameToken.lexeme, initializer, nameToken.line, nameToken.column);
     }
 
     private StatementNode statement() {
@@ -118,7 +109,7 @@ public class Parser {
             consume(SEMICOLON, "Expect ';' after continue.");
             return new ContinueStmtNode(previous().line, previous().column);
         }
-        if (isVarDeclaration()) return varDeclStmt();
+        if (isVarDeclaration()) return varDecl();
         return exprStmt();
     }
 
@@ -156,7 +147,7 @@ public class Parser {
 
         StatementNode initializer = null;
         if (match(SEMICOLON)) { }
-        else if (isVarDeclaration()) initializer = varDeclStmt();
+        else if (isVarDeclaration()) initializer = varDecl();
         else initializer = exprStmt();
 
         ExpressionNode condition = !check(SEMICOLON) ? expression() : null;
@@ -190,7 +181,7 @@ public class Parser {
             Token op = previous();
             ExpressionNode value = assignment();
 
-            if (expr instanceof IdentifierExprNode) {
+            if (expr instanceof IdentifierExprNode || expr instanceof ArrayIndexExprNode) {
                 if (op.type != OP_ASSIGN) {
                     Token binaryOp = desugarOp(op);
                     value = new BinaryExprNode(expr, binaryOp, value, expr.line, expr.column);
@@ -229,6 +220,17 @@ public class Parser {
     }
 
     private ExpressionNode primary() {
+        if (match(IDENTIFIER)) {
+            Token n = previous();
+            if (match(LPAREN)) return finishCall(n);
+            if (match(LBRACKET)) {
+                ExpressionNode i = expression();
+                consume(RBRACKET, "Expect ']'");
+                return new ArrayIndexExprNode(n.lexeme, i, n.line, n.column);
+            }
+            return new IdentifierExprNode(n.lexeme, n.line, n.column);
+        }
+
         if (match(KW_TRUE))
             return new LiteralExprNode(true, "bool", previous().line, previous().column);
         if (match(KW_FALSE))
@@ -240,12 +242,6 @@ public class Parser {
         if (match(LIT_STRING))
             return new LiteralExprNode(previous().literal, "string", previous().line, previous().column);
 
-        if (match(IDENTIFIER)) {
-            Token name = previous();
-            if (match(LPAREN)) return finishCall(name);
-            return new IdentifierExprNode(name.lexeme, name.line, name.column);
-        }
-
         if (match(LPAREN)) {
             Token paren = previous();
             ExpressionNode expr = expression();
@@ -254,6 +250,22 @@ public class Parser {
         }
 
         throw error(peek(), "Expect expression.");
+    }
+
+    private StatementNode varDecl() {
+        Token type = parseType();
+        Token name = consume(IDENTIFIER, "Expect variable name.");
+
+        if (match(LBRACKET)) {
+            int size = (Integer) consume(LIT_INT, "Expect array size.").literal;
+            consume(RBRACKET, "Expect ']'");
+            consume(SEMICOLON, "Expect ';'");
+            return new VarDeclStmtNode(type.lexeme, name.lexeme, null, size, name.line, name.column);
+        }
+
+        ExpressionNode init = match(OP_ASSIGN) ? expression() : null;
+        consume(SEMICOLON, "Expect ';' after variable declaration.");
+        return new VarDeclStmtNode(type.lexeme, name.lexeme, init, -1, name.line, name.column);
     }
 
     private CallExprNode finishCall(Token callee) {
@@ -268,29 +280,27 @@ public class Parser {
 
     private boolean isVarDeclaration() {
         if (check(KW_INT) || check(KW_FLOAT) || check(KW_BOOL) || check(KW_VOID)) return true;
-        if (check(IDENTIFIER) && current + 1 < tokens.size() && tokens.get(current + 1).type == IDENTIFIER) return true;
-        return false;
+        return check(IDENTIFIER) && current + 1 < tokens.size() && tokens.get(current + 1).type == IDENTIFIER;
     }
 
     private String parseTypeName() {
-        if (match(KW_INT)) return "int";
-        if (match(KW_FLOAT)) return "float";
-        if (match(KW_BOOL)) return "bool";
-        if (match(KW_VOID)) return "void";
-        if (match(IDENTIFIER)) return previous().lexeme;
+        if (match(KW_INT, KW_FLOAT, KW_BOOL, KW_VOID, IDENTIFIER)) return previous().lexeme;
+        throw error(peek(), "Expect type.");
+    }
+
+    private Token parseType() {
+        if (match(KW_INT, KW_FLOAT, KW_BOOL, KW_VOID, IDENTIFIER)) return previous();
         throw error(peek(), "Expect type.");
     }
 
     private Token desugarOp(Token op) {
-        TokenType t;
-        switch (op.type) {
-            case PLUS_ASSIGN: t = OP_PLUS; break;
-            case MINUS_ASSIGN: t = OP_MINUS; break;
-            case MULTIPLY_ASSIGN: t = OP_MULTIPLY; break;
-            case DIVIDE_ASSIGN: t = OP_DIVIDE; break;
-            default: return op;
-        }
-        return new Token(t, op.lexeme.substring(0, 1), null, op.line, op.column);
+        return switch (op.type) {
+            case PLUS_ASSIGN -> new Token(OP_PLUS, "+", null, op.line, op.column);
+            case MINUS_ASSIGN -> new Token(OP_MINUS, "-", null, op.line, op.column);
+            case MULTIPLY_ASSIGN -> new Token(OP_MULTIPLY, "*", null, op.line, op.column);
+            case DIVIDE_ASSIGN -> new Token(OP_DIVIDE, "/", null, op.line, op.column);
+            default -> op;
+        };
     }
 
     private boolean match(TokenType... types) {

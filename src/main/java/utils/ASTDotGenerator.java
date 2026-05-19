@@ -226,4 +226,17 @@ public class ASTDotGenerator implements ASTVisitor<Integer> {
         }
         return id;
     }
+
+    @Override
+    public Integer visit(ArrayIndexExprNode node) {
+        int id = createNode("Index: " + node.arrayName, "#FFA07A");
+        int indexId = node.index.accept(this);
+        edge(id, indexId);
+        return id;
+    }
+
+    @Override
+    public Integer visit(StmtWrapper node) {
+        return node.statement.accept(this);
+    }
 }

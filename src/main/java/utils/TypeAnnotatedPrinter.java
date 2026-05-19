@@ -226,4 +226,14 @@ public class TypeAnnotatedPrinter implements ASTVisitor<String> {
         String resolved = node.resolvedSymbol != null ? "@" + node.resolvedSymbol.line : "";
         return node.callee.accept(this) + resolved + "(" + args + ")";
     }
+
+    @Override
+    public String visit(ArrayIndexExprNode node) {
+        return node.arrayName + "[" + node.index.accept(this) + "]" + (node.resolvedType != null ? " [type: " + node.resolvedType + "]" : "");
+    }
+
+    @Override
+    public String visit(StmtWrapper node) {
+        return node.statement.accept(this);
+    }
 }

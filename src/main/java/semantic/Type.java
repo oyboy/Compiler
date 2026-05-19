@@ -124,4 +124,28 @@ public abstract class Type {
             default:       return null;
         }
     }
+
+    public static class ArrayType extends Type {
+        public final Type elementType;
+        public final int size;
+
+        public ArrayType(Type elementType, int size) {
+            this.elementType = elementType;
+            this.size = size;
+        }
+
+        @Override
+        public String getName() {
+            return elementType.getName() + "[" + size + "]";
+        }
+
+        @Override
+        public boolean isCompatibleWith(Type other) {
+            if (this.isError() || (other != null && other.isError())) return true;
+            if (other instanceof ArrayType) {
+                return elementType.isCompatibleWith(((ArrayType) other).elementType);
+            }
+            return false;
+        }
+    }
 }

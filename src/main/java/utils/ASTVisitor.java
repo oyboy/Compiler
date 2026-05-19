@@ -12,6 +12,7 @@ public interface ASTVisitor<R> {
     R visit(GroupingExprNode node);
     R visit(AssignmentExprNode node);
     R visit(CallExprNode node);
+    R visit(ArrayIndexExprNode node);
 
     R visit(BlockStmtNode node);
     R visit(ExprStmtNode node);
@@ -26,4 +27,5 @@ public interface ASTVisitor<R> {
     R visit(FunctionDeclNode node);
     R visit(StructDeclNode node);
     R visit(VarDeclWrapper node);
+    R visit(StmtWrapper node);
 }

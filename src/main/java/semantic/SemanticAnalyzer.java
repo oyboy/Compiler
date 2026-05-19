@@ -148,6 +148,11 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
     @Override
     public Type visit(VarDeclStmtNode node) {
         Type declaredType = resolveType(node.type, node.line, node.column);
+
+        if (node.size >= 0) {
+            declaredType = new Type.ArrayType(declaredType, node.size);
+        }
+
         if (symbolTable.lookupLocal(node.name).isPresent()) {
             error(SemanticError.ErrorType.DUPLICATE_DECLARATION,
                     "Variable '" + node.name + "' is already declared in this scope",
@@ -155,14 +160,14 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
             return null;
         }
 
-        boolean initialized = node.initializer != null;
+        boolean initialized = node.initializer != null || node.size >= 0;
 
         if (node.initializer != null) {
             Type initType = node.initializer.accept(this);
             if (!initType.isError() && !declaredType.isCompatibleWith(initType)) {
                 error(SemanticError.ErrorType.TYPE_MISMATCH,
                         "Cannot assign '" + initType + "' to variable of type '" + declaredType + "'",
-                        currentContext(), node.line, node.column);
+                        currentContext(), node.initializer.line, node.initializer.column);
             }
         }
 
@@ -363,37 +368,32 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
 
     @Override
     public Type visit(AssignmentExprNode node) {
-        if (!(node.target instanceof IdentifierExprNode)) {
-            error(SemanticError.ErrorType.INVALID_ASSIGNMENT_TARGET,
-                    "Left side of assignment must be a variable",
-                    currentContext(), node.line, node.column);
-            node.resolvedType = Type.ERROR;
-            return Type.ERROR;
-        }
-
-        String varName = ((IdentifierExprNode) node.target).name;
-        Optional<Symbol> sym = symbolTable.lookup(varName);
-
-        if (sym.isEmpty()) {
-            error(SemanticError.ErrorType.UNDECLARED_IDENTIFIER,
-                    "Undeclared variable '" + varName + "'",
-                    currentContext(), node.line, node.column);
-            node.resolvedType = Type.ERROR;
-            return Type.ERROR;
-        }
-
-        Type varType = sym.get().type;
+        Type targetType = node.target.accept(this);
         Type valueType = node.value.accept(this);
 
-        if (!valueType.isError() && !varType.isCompatibleWith(valueType)) {
-            error(SemanticError.ErrorType.TYPE_MISMATCH,
-                    "Cannot assign '" + valueType + "' to variable '" + varName + "' of type '" + varType + "'",
+        if (!(node.target instanceof IdentifierExprNode) && !(node.target instanceof ArrayIndexExprNode)) {
+            error(SemanticError.ErrorType.INVALID_ASSIGNMENT_TARGET,
+                    "Left side of assignment must be a variable or array element",
                     currentContext(), node.line, node.column);
+            node.resolvedType = Type.ERROR;
+            return Type.ERROR;
         }
 
-        sym.get().initialized = true;
-        node.resolvedType = varType;
-        return varType;
+        if (targetType.isError() || valueType.isError()) {
+            node.resolvedType = Type.ERROR;
+            return Type.ERROR;
+        }
+
+        if (!targetType.isCompatibleWith(valueType)) {
+            error(SemanticError.ErrorType.TYPE_MISMATCH,
+                    "Cannot assign '" + valueType + "' to '" + targetType + "'",
+                    currentContext(), node.line, node.column);
+            node.resolvedType = Type.ERROR;
+            return Type.ERROR;
+        }
+
+        node.resolvedType = targetType;
+        return targetType;
     }
 
     @Override
@@ -468,6 +468,34 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
         node.resolvedSymbol = sym.get();
         node.resolvedType = funcType.returnType;
         return funcType.returnType;
+    }
+
+    @Override
+    public Type visit(ArrayIndexExprNode node) {
+        Optional<Symbol> sym = symbolTable.lookup(node.arrayName);
+        if (sym.isEmpty()) {
+            error(SemanticError.ErrorType.UNDECLARED_IDENTIFIER, "Undeclared array '" + node.arrayName + "'", currentContext(), node.line, node.column);
+            return Type.ERROR;
+        }
+
+        if (!(sym.get().type instanceof Type.ArrayType)) {
+            error(SemanticError.ErrorType.TYPE_MISMATCH, "'" + node.arrayName + "' is not an array", currentContext(), node.line, node.column);
+            return Type.ERROR;
+        }
+
+        Type indexType = node.index.accept(this);
+        if (indexType != Type.INT) {
+            error(SemanticError.ErrorType.TYPE_MISMATCH, "Array index must be int, got " + indexType, currentContext(), node.line, node.column);
+        }
+
+        Type.ArrayType at = (Type.ArrayType) sym.get().type;
+        node.resolvedType = at.elementType;
+        return at.elementType;
+    }
+
+    @Override
+    public Type visit(StmtWrapper node) {
+        return node.statement.accept(this);
     }
 
     private Type resolveType(String typeName, int line, int column) {
