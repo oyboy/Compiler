@@ -52,7 +52,7 @@ public class Main {
         }
 
         if (inputFile == null) {
-            System.err.println("Usage: java Main <source_file> [--ast-format text|dot|json] [--output-file <file>] [--verbose]");
+            System.err.println("Usage: java Main <source_file> [options]");
             System.exit(1);
         }
 
@@ -69,87 +69,75 @@ public class Main {
 
             if (verbose) {
                 System.err.println("=== Tokens ===");
-                tokens.forEach(tok -> System.err.println("  " + tok));
-                System.err.println("=== Parsing ===");
+                for (Token token : tokens) {
+                    System.err.println("  " + token);
+                }
             }
 
             Parser parser = new Parser(tokens);
             ProgramNode program = parser.parse();
 
             if (!parser.getErrors().isEmpty()) {
-                System.err.println("Parse errors:");
-                parser.getErrors().forEach(e -> System.err.println("  " + e));
+                System.err.println("--- Syntax Errors ---");
+                for (String err : parser.getErrors()) {
+                    System.err.println("  " + err);
+                }
+                System.exit(1);
             }
 
-            SemanticAnalyzer analyzer = new SemanticAnalyzer("main");
+            SemanticAnalyzer analyzer = new SemanticAnalyzer();
             analyzer.analyze(program);
 
-            if (showReport) {
-                System.out.println(ValidationReport.generate(program, analyzer));
-            } else {
-                if (showTypes) {
-                    TypeAnnotatedPrinter printer = new TypeAnnotatedPrinter();
-                    System.out.println(printer.print(program));
-                } else {
-                    ASTPrettyPrinter printer = new ASTPrettyPrinter();
-                    System.out.println(printer.print(program));
+            if (!analyzer.getErrors().isEmpty()) {
+                System.err.println("--- Semantic Errors ---");
+                for (Object err : analyzer.getErrors()) {
+                    System.err.println(err.toString());
                 }
-                if (showSymbols) {
-                    System.out.println(analyzer.getSymbolTable().dump());
-                }
-                if (!analyzer.getErrors().isEmpty()) {
-                    System.err.println("--- Semantic Errors ---");
-                    analyzer.getErrors().forEach(e -> System.err.println(e.toString()));
-                }
+                System.exit(1);
             }
 
-            String output = "./";
-            switch (format) {
-                case "dot":
-                    output = new ASTDotGenerator().generate(program);
-                    break;
-                case "json":
-                    System.out.println("Not supported yet");
-                    break;
-                default:
-                    output = new ASTPrettyPrinter().print(program);
-                    break;
+            IRGenerator irGen = new IRGenerator();
+            IRProgram irProgram = irGen.generate(program);
+
+            if (generateAsm) {
+                X86Generator x86Gen = new X86Generator();
+                String assembly = x86Gen.generate(irProgram);
+                String path = (asmOutput != null) ? asmOutput : "out.asm";
+                Files.writeString(Paths.get(path), assembly);
+            }
+
+            if (generateIR && irOutput != null) {
+                String irResult = irFormat.equals("dot")
+                        ? new IRDotGenerator().generate(irProgram)
+                        : irProgram.toString();
+                Files.writeString(Paths.get(irOutput), irResult);
             }
 
             if (outputFile != null) {
-                Files.writeString(Paths.get(outputFile), output);
-                if (verbose) System.err.println("Output written to " + outputFile);
-            } else {
-                System.out.println(output);
+                String astOutput = format.equals("dot")
+                        ? new ASTDotGenerator().generate(program)
+                        : new ASTPrettyPrinter().print(program);
+                Files.writeString(Paths.get(outputFile), astOutput);
             }
 
-            if (generateIR) {
-                IRGenerator irGen = new IRGenerator();
-                IRProgram irProgram = irGen.generate(program);
-                String irResult;
-                switch (irFormat) {
-                    case "dot":
-                        irResult = new IRDotGenerator().generate(irProgram);
-                        break;
-                    default:
-                        irResult = irProgram.toString();
+            if (showReport) {
+                System.out.println(ValidationReport.generate(program, analyzer));
+            } else if (showTypes) {
+                System.out.println(new TypeAnnotatedPrinter().print(program));
+            } else if (generateIR && irOutput == null) {
+                System.out.println(irProgram.toString());
+            } else if (showSymbols) {
+                System.out.println(analyzer.getSymbolTable().dump());
+            } else if (outputFile == null) {
+                String astOutput;
+                switch (format) {
+                    case "dot": astOutput = new ASTDotGenerator().generate(program); break;
+                    case "json": astOutput = "JSON not supported yet"; break;
+                    default: astOutput = new ASTPrettyPrinter().print(program); break;
                 }
-                if (irOutput != null) {
-                    Files.writeString(Paths.get(irOutput), irResult);
-                    if (verbose) System.err.println("IR written to " + irOutput);
-                } else {
-                    System.out.println(irResult);
-                }
+                System.out.println(astOutput);
             }
 
-            if (generateAsm) {
-                IRGenerator irGen = new IRGenerator();
-                IRProgram irProgram = irGen.generate(program);
-                X86Generator x86Gen = new X86Generator();
-                String assembly = x86Gen.generate(irProgram);
-                Files.writeString(Paths.get(asmOutput), assembly);
-                System.out.println("Assembly generated: " + asmOutput);
-            }
         } catch (IOException e) {
             System.err.println("Error: " + e.getMessage());
             System.exit(1);

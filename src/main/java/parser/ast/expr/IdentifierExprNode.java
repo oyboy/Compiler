@@ -4,7 +4,7 @@ import utils.ASTVisitor;
 import parser.ast.ExpressionNode;
 
 public class IdentifierExprNode extends ExpressionNode {
-    public final String name;
+    public String name;
 
     public IdentifierExprNode(String name, int line, int column) {
         super(line, column);

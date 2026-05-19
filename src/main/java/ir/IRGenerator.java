@@ -16,6 +16,8 @@ public class IRGenerator implements ASTVisitor<Operand> {
     private int tempCounter = 0;
     private int labelCounter = 0;
     private final Set<String> usedLabels = new HashSet<>();
+    private final Deque<String> breakLabels = new ArrayDeque<>();
+    private final Deque<String> continueLabels = new ArrayDeque<>();
 
     public IRProgram generate(ProgramNode program) {
         for (DeclarationNode decl : program.declarations) {
@@ -183,6 +185,8 @@ public class IRGenerator implements ASTVisitor<Operand> {
         String headerLabel = newLabel("L_loop");
         String bodyLabel = newLabel("L_body");
         String exitLabel = newLabel("L_endloop");
+        breakLabels.push(exitLabel);
+        continueLabels.push(headerLabel);
 
         BasicBlock beforeLoop = currentBlock;
         emit(new Instruction.Jump(headerLabel));
@@ -205,6 +209,19 @@ public class IRGenerator implements ASTVisitor<Operand> {
         BasicBlock exitBlock = startBlock(exitLabel);
         connectBlocks(headerBlock, exitBlock);
 
+        breakLabels.pop();
+        continueLabels.pop();
+        return null;
+    }
+    @Override
+    public Operand visit(BreakStmtNode node) {
+        emit(new Instruction.Jump(breakLabels.peek()));
+        return null;
+    }
+
+    @Override
+    public Operand visit(ContinueStmtNode node) {
+        emit(new Instruction.Jump(continueLabels.peek()));
         return null;
     }
 
@@ -214,7 +231,11 @@ public class IRGenerator implements ASTVisitor<Operand> {
 
         String headerLabel = newLabel("L_for");
         String bodyLabel = newLabel("L_forbody");
+        String updateLabel = newLabel("L_for_update");
         String exitLabel = newLabel("L_endfor");
+
+        breakLabels.push(exitLabel);
+        continueLabels.push(updateLabel);
 
         BasicBlock beforeLoop = currentBlock;
         emit(new Instruction.Jump(headerLabel));
@@ -242,7 +263,8 @@ public class IRGenerator implements ASTVisitor<Operand> {
 
         BasicBlock exitBlock = startBlock(exitLabel);
         connectBlocks(headerBlock, exitBlock);
-
+        breakLabels.pop();
+        continueLabels.pop();
         return null;
     }
 

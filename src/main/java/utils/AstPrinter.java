@@ -46,6 +46,15 @@ public class AstPrinter implements ASTVisitor<String> {
                 .collect(Collectors.joining(" "));
         return "(block " + body + ")";
     }
+    @Override
+    public String visit(BreakStmtNode node) {
+        return "(break)";
+    }
+
+    @Override
+    public String visit(ContinueStmtNode node) {
+        return "(continue)";
+    }
 
     @Override
     public String visit(VarDeclStmtNode node) {

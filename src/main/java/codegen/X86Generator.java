@@ -123,7 +123,6 @@ public class X86Generator {
         } else if (instr instanceof Instruction.Param) {
             Instruction.Param p = (Instruction.Param) instr;
             asm.append("    mov ").append(ABI.ARG_REGISTERS[p.index]).append(", ").append(currentFrame.getAddress(p.value)).append("\n");
-
         } else if (instr instanceof Instruction.Call) {
             Instruction.Call c = (Instruction.Call) instr;
             asm.append("    call ").append(c.funcName).append("\n");

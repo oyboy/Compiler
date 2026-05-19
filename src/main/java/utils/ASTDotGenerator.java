@@ -82,6 +82,15 @@ public class ASTDotGenerator implements ASTVisitor<Integer> {
         }
         return id;
     }
+    @Override
+    public Integer visit(BreakStmtNode node) {
+        return createNode("Break", "#FFCCCC");
+    }
+
+    @Override
+    public Integer visit(ContinueStmtNode node) {
+        return createNode("Continue", "#CCFFCC");
+    }
 
     @Override
     public Integer visit(VarDeclStmtNode node) {

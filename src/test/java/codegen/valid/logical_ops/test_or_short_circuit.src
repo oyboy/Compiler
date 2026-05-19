@@ -1,6 +1,6 @@
 fn main() -> int {
     int x = 50;
-    if (true || (x = 100)) {
+    if (true || (x == 100)) {
         int dummy = 1;
     }
     return x;

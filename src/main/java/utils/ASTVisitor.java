@@ -20,6 +20,8 @@ public interface ASTVisitor<R> {
     R visit(ForStmtNode node);
     R visit(ReturnStmtNode node);
     R visit(VarDeclStmtNode node);
+    R visit(BreakStmtNode node);
+    R visit(ContinueStmtNode node);
 
     R visit(FunctionDeclNode node);
     R visit(StructDeclNode node);

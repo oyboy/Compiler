@@ -110,6 +110,14 @@ public class Parser {
         if (match(KW_FOR)) return forStmt();
         if (match(KW_RETURN)) return returnStmt();
         if (match(SEMICOLON)) return new BlockStmtNode(new ArrayList<>(), previous().line, previous().column);
+        if (match(KW_BREAK)) {
+            consume(SEMICOLON, "Expect ';' after break.");
+            return new BreakStmtNode(previous().line, previous().column);
+        }
+        if (match(KW_CONTINUE)) {
+            consume(SEMICOLON, "Expect ';' after continue.");
+            return new ContinueStmtNode(previous().line, previous().column);
+        }
         if (isVarDeclaration()) return varDeclStmt();
         return exprStmt();
     }

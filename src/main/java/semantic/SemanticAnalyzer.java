@@ -14,6 +14,7 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
 
     private String currentFunctionName = null;
     private Type currentFunctionReturnType = null;
+    private int loopDepth = 0;
     private final String filename;
 
     public SemanticAnalyzer() {
@@ -188,15 +189,33 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
 
     @Override
     public Type visit(WhileStmtNode node) {
+        loopDepth++;
         Type condType = node.condition.accept(this);
         checkCondition(condType, node.condition.line, node.condition.column);
 
         node.body.accept(this);
+        loopDepth--;
+        return null;
+    }
+    @Override
+    public Type visit(BreakStmtNode node) {
+        if (loopDepth == 0) {
+            error(SemanticError.ErrorType.INVALID_BREAK, "break outside of loop", null, node.line, node.column);
+        }
+        return null;
+    }
+
+    @Override
+    public Type visit(ContinueStmtNode node) {
+        if (loopDepth == 0) {
+            error(SemanticError.ErrorType.INVALID_CONTINUE, "continue outside of loop", null, node.line, node.column);
+        }
         return null;
     }
 
     @Override
     public Type visit(ForStmtNode node) {
+        loopDepth++;
         symbolTable.enterScope();
 
         if (node.initializer != null) node.initializer.accept(this);
@@ -211,6 +230,7 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
         node.body.accept(this);
 
         symbolTable.exitScope();
+        loopDepth--;
         return null;
     }
 
@@ -386,9 +406,28 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
             return Type.ERROR;
         }
 
-        String funcName = ((IdentifierExprNode) node.callee).name;
-        Optional<Symbol> sym = symbolTable.lookup(funcName);
+        IdentifierExprNode callee = (IdentifierExprNode) node.callee;
+        String funcName = callee.name;
 
+        if (funcName.equals("print")) {
+            if (node.arguments.size() != 1) {
+                throw new RuntimeException("print expects 1 argument");
+            }
+
+            Type argType = node.arguments.get(0).accept(this);
+
+            if (argType == Type.INT) callee.name = "print_int";
+            else if (argType == Type.BOOL) callee.name = "print_bool";
+            else if (argType == Type.FLOAT) callee.name = "print_float";
+            else if (argType == Type.STRING) callee.name = "print_string";
+            else throw new RuntimeException("Cannot print type: " + argType);
+
+            node.resolvedType = Type.VOID;
+            return Type.VOID;
+        }
+
+
+        Optional<Symbol> sym = symbolTable.lookup(funcName);
         if (sym.isEmpty()) {
             error(SemanticError.ErrorType.UNDECLARED_IDENTIFIER,
                     "Undeclared function '" + funcName + "'",

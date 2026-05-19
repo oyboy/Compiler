@@ -46,6 +46,15 @@ public class ASTPrettyPrinter implements ASTVisitor<String> {
         indent--;
         return sb.toString();
     }
+    @Override
+    public String visit(BreakStmtNode node) {
+        return pad() + "Break\n";
+    }
+
+    @Override
+    public String visit(ContinueStmtNode node) {
+        return pad() + "Continue\n";
+    }
 
     @Override
     public String visit(StructDeclNode node) {

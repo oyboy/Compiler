@@ -14,7 +14,9 @@ public class SemanticError {
         NOT_A_FUNCTION,
         NOT_A_VARIABLE,
         VOID_RETURN_VALUE,
-        MISSING_RETURN
+        MISSING_RETURN,
+        INVALID_BREAK,
+        INVALID_CONTINUE
     }
 
     public final ErrorType errorType;

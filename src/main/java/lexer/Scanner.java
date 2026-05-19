@@ -31,6 +31,8 @@ public class Scanner {
         keywords.put("void", TokenType.KW_VOID);
         keywords.put("struct", TokenType.KW_STRUCT);
         keywords.put("fn", TokenType.KW_FN);
+        keywords.put("break", TokenType.KW_BREAK);
+        keywords.put("continue", TokenType.KW_CONTINUE);
     }
 
     public Scanner(String source) {
