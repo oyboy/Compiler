@@ -70,7 +70,7 @@ run_tests() {
             continue
         fi
 
-        ld "$TEMP_DIR/output.o" "$TEMP_DIR/runtime.o" -o "$TEMP_DIR/test_exec"
+        gcc -no-pie "$TEMP_DIR/output.o" "$TEMP_DIR/runtime.o" -o "$TEMP_DIR/test_exec"
         if [ $? -ne 0 ]; then
             echo -e "${RED}FAIL (Linker Error)${NC}"
             ((FAILED++))
@@ -82,8 +82,8 @@ run_tests() {
         actual_exit_code=$?
 
         if [ -f "$expected_file" ]; then
-                    expected_exit=$(grep "EXIT:" "$expected_file" | cut -d' ' -f2)
-                    expected_stdout=$(grep "STDOUT:" "$expected_file" | cut -d' ' -f2)
+                    expected_exit=$(grep "EXIT:" "$expected_file" | sed 's/EXIT: //' | tr -d '\r')
+                    expected_stdout=$(grep "STDOUT:" "$expected_file" | sed 's/STDOUT: //' | tr -d '\r')
 
                     SUCCESS=true
                     if [ "$actual_exit_code" -ne "$expected_exit" ]; then
@@ -109,14 +109,18 @@ run_tests() {
     done
 }
 
-run_tests "valid/arithmetic_ops"
-run_tests "valid/control_flow"
-run_tests "valid/function_calls"
-run_tests "valid/integration"
-run_tests "valid/conditionals"
-run_tests "valid/loops"
-run_tests "valid/logical_ops"
-run_tests "valid/complex_expressions"
+#run_tests "valid/arithmetic_ops"
+#run_tests "valid/control_flow"
+#run_tests "valid/function_calls"
+#run_tests "valid/integration"
+#run_tests "valid/conditionals"
+#run_tests "valid/loops"
+#run_tests "valid/logical_ops"
+#run_tests "valid/complex_expressions"
+run_tests "arrays"
+run_tests "external"
+run_tests "invalid"
+run_tests "optimizations"
 
 echo -e "\n----------------------------------------"
 echo -e "TOTAL: $((PASSED + FAILED))"

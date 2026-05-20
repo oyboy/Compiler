@@ -18,6 +18,7 @@ public class IRGenerator implements ASTVisitor<Operand> {
     private final Set<String> usedLabels = new HashSet<>();
     private final Deque<String> breakLabels = new ArrayDeque<>();
     private final Deque<String> continueLabels = new ArrayDeque<>();
+    private int stringCounter = 0;
 
     public IRProgram generate(ProgramNode program) {
         for (DeclarationNode decl : program.declarations) {
@@ -282,6 +283,7 @@ public class IRGenerator implements ASTVisitor<Operand> {
     @Override
     public Operand visit(LiteralExprNode node) {
         return switch (node.literalType) {
+            case "string" -> new Operand.StringLiteral((String) node.value, "L_str_" + (stringCounter++));
             case "int" -> new Operand.IntLiteral(((Number) node.value).intValue());
             case "float" -> new Operand.FloatLiteral(((Number) node.value).doubleValue());
             case "bool" -> new Operand.BoolLiteral((Boolean) node.value);

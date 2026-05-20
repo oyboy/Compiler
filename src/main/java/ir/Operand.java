@@ -43,4 +43,11 @@ public abstract class Operand {
         @Override
         public String toString() { return name; }
     }
+
+    public static class StringLiteral extends Operand {
+        public final String value;
+        public final String label;
+        public StringLiteral(String value, String label) { this.value = value; this.label = label; }
+        @Override public String toString() { return label; }
+    }
 }

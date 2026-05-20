@@ -26,6 +26,7 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
     }
 
     public void analyze(ProgramNode program) {
+        registerBuiltIns();
         for (DeclarationNode decl : program.declarations) {
             if (decl instanceof FunctionDeclNode) registerFunction((FunctionDeclNode) decl);
             if (decl instanceof StructDeclNode) registerStruct((StructDeclNode) decl);
@@ -33,6 +34,25 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
         for (DeclarationNode decl : program.declarations) {
             decl.accept(this);
         }
+    }
+
+    private void registerBuiltIns() {
+        symbolTable.insert(new Symbol("malloc",
+                new Type.FunctionType(List.of(Type.INT), Type.INT),
+                Symbol.Kind.FUNCTION, 0, 0, true));
+
+        symbolTable.insert(new Symbol("free",
+                new Type.FunctionType(List.of(Type.INT), Type.VOID),
+                Symbol.Kind.FUNCTION, 0, 0, true));
+
+        symbolTable.insert(new Symbol("printf",
+                new Type.FunctionType(List.of(Type.STRING), Type.INT),
+                Symbol.Kind.FUNCTION, 0, 0, true));
+
+        symbolTable.insert(new Symbol("scanf",
+                new Type.FunctionType(List.of(Type.STRING), Type.INT),
+                Symbol.Kind.FUNCTION, 0, 0, true)
+        );
     }
 
     public List<SemanticError> getErrors() { return Collections.unmodifiableList(errors); }
@@ -368,6 +388,12 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
 
     @Override
     public Type visit(AssignmentExprNode node) {
+        if (node.target instanceof IdentifierExprNode id) {
+            symbolTable.lookup(id.name).ifPresent(s -> s.initialized = true);
+        } else if (node.target instanceof ArrayIndexExprNode ai) {
+            symbolTable.lookup(ai.arrayName).ifPresent(s -> s.initialized = true);
+        }
+
         Type targetType = node.target.accept(this);
         Type valueType = node.value.accept(this);
 
@@ -411,7 +437,8 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
 
         if (funcName.equals("print")) {
             if (node.arguments.size() != 1) {
-                throw new RuntimeException("print expects 1 argument");
+                error(SemanticError.ErrorType.ARGUMENT_COUNT_MISMATCH, "print expects 1 argument", currentContext(), node.line, node.column);
+                return Type.VOID;
             }
 
             Type argType = node.arguments.get(0).accept(this);
@@ -420,12 +447,31 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
             else if (argType == Type.BOOL) callee.name = "print_bool";
             else if (argType == Type.FLOAT) callee.name = "print_float";
             else if (argType == Type.STRING) callee.name = "print_string";
-            else throw new RuntimeException("Cannot print type: " + argType);
+            else error(SemanticError.ErrorType.TYPE_MISMATCH, "Cannot print type: " + argType, currentContext(), node.line, node.column);
 
             node.resolvedType = Type.VOID;
             return Type.VOID;
         }
 
+        if (funcName.equals("printf")) {
+            for (ExpressionNode arg : node.arguments) {
+                arg.accept(this);
+            }
+            node.resolvedType = Type.INT;
+            return Type.INT;
+        }
+
+        if (funcName.equals("scanf")) {
+            for (int i = 0; i < node.arguments.size(); i++) {
+                ExpressionNode arg = node.arguments.get(i);
+                if (i > 0 && arg instanceof IdentifierExprNode idNode) {
+                    symbolTable.lookup(idNode.name).ifPresent(s -> s.initialized = true);
+                }
+                arg.accept(this);
+            }
+            node.resolvedType = Type.INT;
+            return Type.INT;
+        }
 
         Optional<Symbol> sym = symbolTable.lookup(funcName);
         if (sym.isEmpty()) {

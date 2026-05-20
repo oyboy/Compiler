@@ -1,0 +1,9 @@
+fn main() -> int {
+    int arr[10];
+    int i = 0;
+    while (i < 10) {
+        arr[i] = i * 2;
+        i = i + 1;
+    }
+    return arr[5] + arr[9];
+}

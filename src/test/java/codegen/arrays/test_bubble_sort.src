@@ -1,0 +1,21 @@
+fn main() -> int {
+    int a[5];
+    a[0] = 5; a[1] = 4; a[2] = 3; a[3] = 2; a[4] = 1;
+
+    for (int i = 0; i < 5; i = i + 1) {
+        for (int j = 0; j < 4; j = j + 1) {
+            if (a[j] > a[j + 1]) {
+                int t = a[j];
+                a[j] = a[j + 1];
+                a[j + 1] = t;
+            }
+        }
+    }
+
+    int sum = 0;
+    for (int k = 0; k < 5; k = k + 1) {
+        print(a[k]);
+        sum = sum + a[k];
+    }
+    return sum;
+}
