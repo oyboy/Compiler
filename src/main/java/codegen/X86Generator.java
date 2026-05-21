@@ -125,13 +125,13 @@ public class X86Generator {
         asm.append("    mov rax, ").append(frame.getAddress(l.addr)).append("\n    mov ").append(frame.getAddress(l.dest)).append(", rax\n");
     }
 
-    private void handleLoadIndex(Instruction.LoadIndex li) {
+/*    private void handleLoadIndex(Instruction.LoadIndex li) {
         asm.append("    mov r11, ").append(frame.getAddress(li.index)).append("\n    shl r11, 3\n    mov r10, rbp\n    sub r10, ").append(frame.getArrayOffset(li.arrayName)).append("\n    mov rax, [r10 + r11]\n    mov ").append(frame.getAddress(li.dest)).append(", rax\n");
     }
 
     private void handleStoreIndex(Instruction.StoreIndex si) {
         asm.append("    mov r11, ").append(frame.getAddress(si.index)).append("\n    shl r11, 3\n    mov r10, rbp\n    sub r10, ").append(frame.getArrayOffset(si.arrayName)).append("\n    mov rax, ").append(frame.getAddress(si.src)).append("\n    mov [r10 + r11], rax\n");
-    }
+    }*/
 
     private void handleJumpIf(Instruction.JumpIf ji) {
         asm.append("    mov rax, ").append(frame.getAddress(ji.condition)).append("\n    test rax, rax\n    jnz .").append(currentFunc.name).append("_").append(ji.label).append("\n");
@@ -139,17 +139,60 @@ public class X86Generator {
 
     private void handleParam(Instruction.Param p) {
         String r = ABI.ARG_REGISTERS[p.index];
-        boolean isF = isMathFunction(p.funcName) || p.funcName.equals("print_float") || (p.funcName.equals("printf") && (p.value instanceof Operand.FloatLiteral || floatTemps.contains(p.value.toString())));
-        if (p.value instanceof Operand.StringLiteral) asm.append("    lea ").append(r).append(", [").append(p.value).append("]\n");
-        else if (isF) {
-            String x = "xmm" + (p.funcName.equals("printf") ? xmmUsed++ : p.index);
-            if (p.value instanceof Operand.FloatLiteral) asm.append("    movsd ").append(x).append(", [").append(floatPool.get(p.value.toString())).append("]\n");
-            else if (floatTemps.contains(p.value.toString())) asm.append("    movsd ").append(x).append(", ").append(frame.getAddress(p.value)).append("\n");
-            else asm.append("    cvtsi2sd ").append(x).append(", ").append(frame.getAddress(p.value)).append("\n");
+        boolean toMath = isMathFunction(p.funcName) || p.funcName.equals("print_float");
+        boolean toPrintf = p.funcName.equals("printf") && p.index > 0;
+
+        if (p.value instanceof Operand.StringLiteral) {
+            asm.append("    lea ").append(r).append(", [").append(p.value).append("]\n");
+        } else if (p.value instanceof Operand.FloatLiteral || floatTemps.contains(p.value.toString())) {
+            String x = "xmm" + (toPrintf ? xmmUsed++ : p.index);
+            String addr = (p.value instanceof Operand.FloatLiteral) ? "[" + floatPool.get(p.value.toString()) + "]" : frame.getAddress(p.value);
+            asm.append("    movsd ").append(x).append(", ").append(addr).append("\n");
         } else {
-            if (p.funcName.equals("scanf") && p.index > 0) asm.append("    lea ").append(r).append(", ").append(frame.getAddress(p.value)).append("\n");
-            else asm.append("    mov ").append(r).append(", ").append(frame.getAddress(p.value)).append("\n");
+            if (p.value instanceof Operand.Variable && isLocalArrayVar(p.value.toString())) {
+                asm.append("    lea ").append(r).append(", ").append(frame.getAddress(p.value)).append("\n");
+            } else if (toMath) {
+                asm.append("    cvtsi2sd xmm").append(p.index).append(", ").append(frame.getAddress(p.value)).append("\n");
+            } else if (p.funcName.equals("scanf") && p.index > 0) {
+                asm.append("    lea ").append(r).append(", ").append(frame.getAddress(p.value)).append("\n");
+            } else {
+                asm.append("    mov ").append(r).append(", ").append(frame.getAddress(p.value)).append("\n");
+            }
         }
+    }
+
+    private void handleLoadIndex(Instruction.LoadIndex li) {
+        asm.append("    mov r11, ").append(frame.getAddress(li.index)).append("\n    shl r11, 3\n");
+        if (isParameter(li.arrayName)) {
+            asm.append("    mov r10, ").append(frame.getAddress(new Operand.Parameter(li.arrayName))).append("\n");
+        } else {
+            asm.append("    mov r10, rbp\n    sub r10, ").append(frame.getArrayOffset(li.arrayName)).append("\n");
+        }
+        asm.append("    mov rax, [r10 + r11]\n    mov ").append(frame.getAddress(li.dest)).append(", rax\n");
+    }
+
+    private void handleStoreIndex(Instruction.StoreIndex si) {
+        asm.append("    mov r11, ").append(frame.getAddress(si.index)).append("\n    shl r11, 3\n");
+        if (isParameter(si.arrayName)) {
+            asm.append("    mov r10, ").append(frame.getAddress(new Operand.Parameter(si.arrayName))).append("\n");
+        } else {
+            asm.append("    mov r10, rbp\n    sub r10, ").append(frame.getArrayOffset(si.arrayName)).append("\n");
+        }
+        asm.append("    mov rax, ").append(frame.getAddress(si.src)).append("\n    mov [r10 + r11], rax\n");
+    }
+
+    private boolean isLocalArrayVar(String name) {
+        String clean = name.replace("[", "").replace("]", "");
+        return currentFunc.variables.keySet().stream().anyMatch(k -> k.startsWith(clean + "$size$"));
+    }
+
+    private boolean isParameter(String name) {
+        for (String p : currentFunc.paramNames) {
+            String pName = p.split(" ")[1];
+            if (pName.contains("[")) pName = pName.substring(0, pName.indexOf("["));
+            if (pName.equals(name)) return true;
+        }
+        return false;
     }
 
     private void handleCall(Instruction.Call c) {
@@ -173,5 +216,4 @@ public class X86Generator {
     }
 
     private boolean isMathFunction(String n) { return List.of("pow", "sqrt", "sin", "cos").contains(n); }
-    private boolean isPrintFloatCall(Instruction.Param p) { return p.funcName.equals("print_float"); }
 }

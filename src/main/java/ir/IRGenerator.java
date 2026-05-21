@@ -293,18 +293,48 @@ public class IRGenerator implements ASTVisitor<Operand> {
 
     @Override
     public Operand visit(IdentifierExprNode node) {
-        if (isParameter(node.name)) return new Operand.Parameter(node.name);
+        if (isParameterArray(node.name)) {
+            return new Operand.Parameter(node.name);
+        }
+
+        if (isParameter(node.name)) {
+            return new Operand.Parameter(node.name);
+        }
+
+        if (isLocalArray(node.name)) {
+            return new Operand.Variable(node.name);
+        }
+
         Operand.Variable var = new Operand.Variable(node.name);
         Operand.Temporary dest = newTemp();
         emit(new Instruction.Load(dest, var));
         return dest;
     }
 
+    private boolean isLocalArray(String name) {
+        if (currentFunction == null) return false;
+        for (String key : currentFunction.variables.keySet()) {
+            if (key.startsWith(name + "$size$")) return true;
+        }
+        return false;
+    }
+
+    private boolean isParameterArray(String name) {
+        if (currentFunction == null) return false;
+        for (String p : currentFunction.paramNames) {
+            if (p.endsWith(" " + name) && p.contains("[")) return true;
+        }
+        return false;
+    }
+
     private boolean isParameter(String name) {
         if (currentFunction == null) return false;
-        for (String param : currentFunction.paramNames) {
-            String paramName = param.substring(param.lastIndexOf(' ') + 1);
-            if (paramName.equals(name)) return true;
+        for (String p : currentFunction.paramNames) {
+            String declaredName = p.substring(p.lastIndexOf(' ') + 1);
+            if (declaredName.contains("[")) {
+                declaredName = declaredName.substring(0, declaredName.indexOf("["));
+            }
+            if (declaredName.equals(name)) return true;
         }
         return false;
     }

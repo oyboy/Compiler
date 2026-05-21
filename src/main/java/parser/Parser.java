@@ -64,7 +64,14 @@ public class Parser {
             do {
                 String type = parseTypeName();
                 Token paramName = consume(IDENTIFIER, "Expect parameter name.");
-                params.add(new ParamNode(type, paramName.lexeme, paramName.line, paramName.column));
+                int size = -1;
+                if (match(LBRACKET)) {
+                    if (check(LIT_INT)) {
+                        size = (Integer) advance().literal;
+                    }
+                    consume(RBRACKET, "Expect ']' after array parameter");
+                }
+                params.add(new ParamNode(type, paramName.lexeme, size, paramName.line, paramName.column));
             } while (match(COMMA));
         }
         consume(RPAREN, "Expect ')' after parameters.");

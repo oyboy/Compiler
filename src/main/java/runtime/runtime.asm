@@ -149,7 +149,7 @@ L_P_RAW:
     mov [rsi], dl
     test rax, rax
     jnz .L_r1
-    mov rdx, rbp
+    lea rdx, [rbp-1]
     sub rdx, rsi
 .L_r2:
     mov rax, 1

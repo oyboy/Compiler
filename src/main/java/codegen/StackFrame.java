@@ -35,15 +35,17 @@ public class StackFrame {
     public String getAddress(Operand op) {
         if (op instanceof Operand.IntLiteral) return String.valueOf(((Operand.IntLiteral) op).value);
         if (op instanceof Operand.BoolLiteral) return ((Operand.BoolLiteral) op).value ? "1" : "0";
-        if (op instanceof Operand.Parameter) {
-            return "[rbp - " + offsets.get(cleanKey(((Operand.Parameter) op).name)) + "]";
-        }
 
         String key = cleanKey(op.toString());
-        Integer offset = offsets.get(key);
-        if (offset == null) {
-            throw new RuntimeException("Missing stack allocation for: " + key);
+
+        if (op instanceof Operand.Parameter) {
+            Integer offset = offsets.get(key);
+            if (offset == null) return key;
+            return "[rbp - " + offset + "]";
         }
+
+        Integer offset = offsets.get(key);
+        if (offset == null) throw new RuntimeException("Missing stack allocation for: " + key);
         return "[rbp - " + offset + "]";
     }
 

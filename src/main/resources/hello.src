@@ -1,41 +1,124 @@
-fn main() -> int {
-    int arr[5];
-    arr[0] = 50;
-    arr[1] = 20;
-    arr[2] = 40;
-    arr[3] = 10;
-    arr[4] = 30;
+fn fib(int n, int memo[100]) -> int {
+    if (n <= 1) {
+        return n;
+    }
 
-    for (int i = 0; i < 5; i = i + 1) {
-        for (int j = 0; j < 4; j = j + 1) {
+    if (memo[n] != -1) {
+        return memo[n];
+    }
+
+    int value;
+    value = fib(n - 1, memo) + fib(n - 2, memo);
+
+    memo[n] = value;
+    return value;
+}
+
+fn factorial(int n) -> int {
+    if (n <= 1) {
+        return 1;
+    }
+
+    return n * factorial(n - 1);
+}
+
+fn bubble_sort(int arr[10], int size) -> void {
+    for (int i = 0; i < size; i = i + 1) {
+        for (int j = 0; j < size - 1; j = j + 1) {
             if (arr[j] > arr[j + 1]) {
-                int temp = arr[j];
+                int temp;
+                temp = arr[j];
                 arr[j] = arr[j + 1];
                 arr[j + 1] = temp;
             }
         }
     }
+}
 
-    for (int i = 0; i < 5; i = i + 1) {
+fn print_array(int arr[10], int size) -> void {
+    for (int i = 0; i < size; i = i + 1) {
         print(arr[i]);
     }
+}
+
+fn math_demo() -> void {
+    print("Math demo");
+
+    print(pow(2.0, 8.0));
+    print(sqrt(144.0));
+    print(sin(30.0));
+    print(cos(30.0));
+
+    if (false) {
+        print("This code is never executed");
+    }
+}
+
+fn benchmark_demo() -> void {
+    int sum;
+    sum = 0;
+
+    for (int i = 0; i < 1000; i = i + 1) {
+        sum = sum + i;
+    }
+
+    print(sum);
+}
+
+fn main() -> int {
+    print("Initial array");
+
+    int arr[10];
+
+    arr[0] = 50;
+    arr[1] = 20;
+    arr[2] = 40;
+    arr[3] = 10;
+    arr[4] = 30;
+    arr[5] = 90;
+    arr[6] = 70;
+    arr[7] = 60;
+    arr[8] = 80;
+    arr[9] = 0;
+
+    print_array(arr, 10);
+
+    bubble_sort(arr, 10);
+
+    print("Sorted array");
+
+    print_array(arr, 10);
+
+    print("Factorial of 5");
+
+    print(factorial(5));
+
+    int memo[100];
+
+    for (int i = 0; i < 100; i = i + 1) {
+        memo[i] = -1;
+    }
+
+    print("Fibonacci of 10");
+
+    print(fib(10, memo));
 
     int x;
-    printf("Enter number: ");
+
+    printf("Enter a number: ");
     scanf("%d", x);
+
     printf("You entered: %d\n", x);
-    printf("Sin(x): %f\n", sin(x));
-    function_with_dead_code();
+    printf("sin(x) = %f\n", sin(x));
+    printf("cos(x) = %f\n", cos(x));
+
+    math_demo();
+
+    benchmark_demo();
 
     return 0;
 }
 
-fn function_with_dead_code() -> void {
-    print("A");
-    if (false) {print("B");}
-    print(pow(2.0, 2.0));
-}
-
-fn unreacheable_function() -> void {
-    print("some text");
+fn unreachable_function() -> void {
+    print("Unused function");
 }

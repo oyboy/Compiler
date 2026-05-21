@@ -73,6 +73,7 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
         List<Type> paramTypes = new ArrayList<>();
         for (ParamNode p : node.params) {
             Type t = resolveType(p.type, p.line, p.column);
+            if (p.size >= 0) t = new Type.ArrayType(t, p.size);
             paramTypes.add(t);
         }
         Type returnType = node.returnType != null
@@ -126,6 +127,7 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
 
         for (ParamNode p : node.params) {
             Type paramType = resolveType(p.type, p.line, p.column);
+            if (p.size >= 0) paramType = new Type.ArrayType(paramType, p.size);
             Symbol paramSym = new Symbol(
                     p.name,
                     paramType,
