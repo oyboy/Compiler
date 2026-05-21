@@ -1,0 +1,6 @@
+fn main() -> int {
+    if (false) {
+        return 999;
+    }
+    return 1;
+}

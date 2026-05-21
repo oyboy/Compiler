@@ -6,6 +6,7 @@ section .data
     S3 db "-"
     S4 db "."
     S5 db 10
+    minus_char db "-", 0
 
 section .text
     global exit_program, print_int, print_bool, print_string, print_float
@@ -91,6 +92,19 @@ print_float:
     mov rbp, rsp
     sub rsp, 16
     movsd [rbp-8], xmm0
+    xorpd xmm1, xmm1
+    ucomisd xmm0, xmm1
+    jae .positive
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, minus_char
+    mov rdx, 1
+    syscall
+    mov rax, 0x8000000000000000
+    movq xmm1, rax
+    xorpd xmm0, xmm1
+
+.positive:
     cvttsd2si rdi, xmm0
     call L_P_RAW
     mov rax, 1
@@ -98,14 +112,9 @@ print_float:
     mov rsi, S4
     mov rdx, 1
     syscall
-    movsd xmm0, [rbp-8]
     cvttsd2si rax, xmm0
     cvtsi2sd xmm1, rax
     subsd xmm0, xmm1
-    movq rax, xmm0
-    mov rbx, 0x7FFFFFFFFFFFFFFF
-    and rax, rbx
-    movq xmm0, rax
     mov rax, 1000000
     cvtsi2sd xmm1, rax
     mulsd xmm0, xmm1
@@ -116,6 +125,7 @@ print_float:
     mov rsi, S5
     mov rdx, 1
     syscall
+
     leave
     ret
 
@@ -148,5 +158,3 @@ L_P_RAW:
     mov rsp, rbp
     pop rbp
     ret
-
-section .note.GNU-stack noalloc noexec nowrite progbits

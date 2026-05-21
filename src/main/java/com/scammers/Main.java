@@ -2,6 +2,7 @@ package com.scammers;
 
 import codegen.X86Generator;
 import ir.IRGenerator;
+import ir.IROptimizer;
 import ir.IRProgram;
 import lexer.Scanner;
 import lexer.Token;
@@ -98,6 +99,8 @@ public class Main {
 
             IRGenerator irGen = new IRGenerator();
             IRProgram irProgram = irGen.generate(program);
+            IROptimizer optimizer = new IROptimizer(irProgram);
+            optimizer.optimize();
 
             if (generateAsm) {
                 X86Generator x86Gen = new X86Generator();

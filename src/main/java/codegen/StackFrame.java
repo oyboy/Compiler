@@ -17,6 +17,7 @@ public class StackFrame {
 
     public void allocate(String identifier) {
         String key = cleanKey(identifier);
+        if (key.matches("-?\\d+") || key.equals("true") || key.equals("false")) return;
         if (!offsets.containsKey(key)) {
             currentOffset += 8;
             offsets.put(key, currentOffset);

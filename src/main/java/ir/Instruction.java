@@ -159,10 +159,12 @@ public abstract class Instruction {
     public static class Param extends Instruction {
         public final int index;
         public final Operand value;
+        public final String funcName;
 
-        public Param(int index, Operand value) {
+        public Param(int index, Operand value, String funcName) {
             this.index = index;
             this.value = value;
+            this.funcName = funcName;
         }
 
         @Override

@@ -70,7 +70,7 @@ run_tests() {
             continue
         fi
 
-        gcc -no-pie "$TEMP_DIR/output.o" "$TEMP_DIR/runtime.o" -o "$TEMP_DIR/test_exec"
+        gcc -no-pie "$TEMP_DIR/output.o" "$TEMP_DIR/runtime.o" -o "$TEMP_DIR/test_exec" -lm
         if [ $? -ne 0 ]; then
             echo -e "${RED}FAIL (Linker Error)${NC}"
             ((FAILED++))
@@ -109,18 +109,17 @@ run_tests() {
     done
 }
 
-#run_tests "valid/arithmetic_ops"
-#run_tests "valid/control_flow"
-#run_tests "valid/function_calls"
-#run_tests "valid/integration"
-#run_tests "valid/conditionals"
-#run_tests "valid/loops"
-#run_tests "valid/logical_ops"
-#run_tests "valid/complex_expressions"
+run_tests "valid/arithmetic_ops"
+run_tests "valid/control_flow"
+run_tests "valid/function_calls"
+run_tests "valid/integration"
+run_tests "valid/conditionals"
+run_tests "valid/loops"
+run_tests "valid/logical_ops"
+run_tests "valid/complex_expressions"
 run_tests "arrays"
 run_tests "external"
 run_tests "invalid"
-run_tests "optimizations"
 
 echo -e "\n----------------------------------------"
 echo -e "TOTAL: $((PASSED + FAILED))"

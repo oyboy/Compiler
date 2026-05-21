@@ -24,6 +24,18 @@ fn main() -> int {
     printf("Enter number: ");
     scanf("%d", x);
     printf("You entered: %d\n", x);
+    printf("Sin(x): %f\n", sin(x));
+    function_with_dead_code();
 
     return 0;
+}
+
+fn function_with_dead_code() -> void {
+    print("A");
+    if (false) {print("B");}
+    print(pow(2.0, 2.0));
+}
+
+fn unreacheable_function() -> void {
+    print("some text");
 }

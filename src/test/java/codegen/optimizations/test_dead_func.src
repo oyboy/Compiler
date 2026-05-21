@@ -1,0 +1,7 @@
+fn main() -> int {
+    return 42;
+}
+
+fn never_called() -> int {
+    return 666;
+}

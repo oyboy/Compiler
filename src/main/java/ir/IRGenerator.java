@@ -447,15 +447,21 @@ public class IRGenerator implements ASTVisitor<Operand> {
     @Override
     public Operand visit(CallExprNode node) {
         String funcName = ((IdentifierExprNode) node.callee).name;
-
+        List<Operand> args = new ArrayList<>();
         for (int i = 0; i < node.arguments.size(); i++) {
-            Operand arg = node.arguments.get(i).accept(this);
-            emit(new Instruction.Param(i, arg));
+            if (funcName.equals("scanf") && i > 0 && node.arguments.get(i) instanceof IdentifierExprNode id) {
+                args.add(new Operand.Variable(id.name));
+            } else {
+                args.add(node.arguments.get(i).accept(this));
+            }
         }
 
-        boolean isVoid = node.resolvedType == null || node.resolvedType == Type.VOID;
-        Operand.Temporary dest = isVoid ? null : newTemp();
-        emit(new Instruction.Call(dest, funcName, node.arguments.size()));
+        for (int i = 0; i < args.size(); i++) {
+            emit(new Instruction.Param(i, args.get(i), funcName));
+        }
+
+        Operand.Temporary dest = (node.resolvedType == null || node.resolvedType == semantic.Type.VOID) ? null : newTemp();
+        emit(new Instruction.Call(dest, funcName, args.size()));
         return dest;
     }
 

@@ -37,22 +37,32 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
     }
 
     private void registerBuiltIns() {
-        symbolTable.insert(new Symbol("malloc",
-                new Type.FunctionType(List.of(Type.INT), Type.INT),
-                Symbol.Kind.FUNCTION, 0, 0, true));
+        regFn("printf", Type.INT, Type.STRING);
+        regFn("scanf", Type.INT, Type.STRING);
+        regFn("puts", Type.INT, Type.STRING);
+        regFn("getchar", Type.INT);
+        regFn("malloc", Type.INT, Type.INT);
+        regFn("free", Type.VOID, Type.INT);
+        regFn("memcpy", Type.INT, Type.INT, Type.INT, Type.INT);
+        regFn("memset", Type.INT, Type.INT, Type.INT, Type.INT);
 
-        symbolTable.insert(new Symbol("free",
-                new Type.FunctionType(List.of(Type.INT), Type.VOID),
-                Symbol.Kind.FUNCTION, 0, 0, true));
+        regFn("pow", Type.FLOAT, Type.FLOAT, Type.FLOAT);
+        regFn("sqrt", Type.FLOAT, Type.FLOAT);
+        regFn("sin", Type.FLOAT, Type.FLOAT);
+        regFn("cos", Type.FLOAT, Type.FLOAT);
 
-        symbolTable.insert(new Symbol("printf",
-                new Type.FunctionType(List.of(Type.STRING), Type.INT),
-                Symbol.Kind.FUNCTION, 0, 0, true));
+        regFn("strlen", Type.INT, Type.STRING);
+        regFn("strcpy", Type.STRING, Type.STRING, Type.STRING);
+        regFn("strcmp", Type.INT, Type.STRING, Type.STRING);
 
-        symbolTable.insert(new Symbol("scanf",
-                new Type.FunctionType(List.of(Type.STRING), Type.INT),
-                Symbol.Kind.FUNCTION, 0, 0, true)
-        );
+        regFn("print_int", Type.VOID, Type.INT);
+        regFn("print_bool", Type.VOID, Type.BOOL);
+        regFn("print_string", Type.VOID, Type.STRING);
+        regFn("print_float", Type.VOID, Type.FLOAT);
+    }
+
+    private void regFn(String name, Type ret, Type... params) {
+        symbolTable.insert(new Symbol(name, new Type.FunctionType(List.of(params), ret), Symbol.Kind.FUNCTION, 0, 0, true));
     }
 
     public List<SemanticError> getErrors() { return Collections.unmodifiableList(errors); }
