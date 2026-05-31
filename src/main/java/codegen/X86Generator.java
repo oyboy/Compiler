@@ -51,8 +51,7 @@ public class X86Generator {
 
     private void preprocess(IRFunction f) {
         for (String v : f.variables.keySet()) {
-            if (v.contains("$size$")) { String[] p = v.split("\\$size\\$"); frame.allocateArray(p[0], Integer.parseInt(p[1])); }
-            else frame.allocate(v);
+            frame.allocate(v);
         }
         for (BasicBlock b : f.blocks) {
             for (Instruction i : b.instructions) {
@@ -75,6 +74,16 @@ public class X86Generator {
         else if (i instanceof Instruction.Param op && !(op.value instanceof Operand.FloatLiteral || op.value instanceof Operand.StringLiteral)) frame.allocate(op.value.toString());
         else if (i instanceof Instruction.Return op && op.value != null) frame.allocate(op.value.toString());
         else if (i instanceof Instruction.JumpIf op) frame.allocate(op.condition.toString());
+        else if (i instanceof Instruction.LoadIndexPtr op) {
+            frame.allocate(op.dest.toString());
+            frame.allocate(op.ptr.toString());
+            frame.allocate(op.index.toString());
+        }
+        else if (i instanceof Instruction.StoreIndexPtr op) {
+            frame.allocate(op.ptr.toString());
+            frame.allocate(op.index.toString());
+            frame.allocate(op.src.toString());
+        }
     }
 
     private void translate(Instruction i) {
@@ -91,6 +100,8 @@ public class X86Generator {
         else if (i instanceof Instruction.Param) handleParam((Instruction.Param) i);
         else if (i instanceof Instruction.Call) handleCall((Instruction.Call) i);
         else if (i instanceof Instruction.Return) handleReturn((Instruction.Return) i);
+        else if (i instanceof Instruction.LoadIndexPtr)  handleLoadIndexPtr((Instruction.LoadIndexPtr) i);
+        else if (i instanceof Instruction.StoreIndexPtr) handleStoreIndexPtr((Instruction.StoreIndexPtr) i);
     }
 
     private void handleBinary(Instruction.BinaryOp b) {
@@ -196,6 +207,20 @@ public class X86Generator {
     }
 
     private void handleCall(Instruction.Call c) {
+        if (c.funcName.equals("malloc")) {
+            asm.append("    xor rax, rax\n");
+            asm.append("    call malloc\n");
+            if (c.dest != null) {
+                asm.append("    mov ")
+                        .append(frame.getAddress(c.dest))
+                        .append(", rax\n");
+            }
+            return;
+        }
+        if (c.funcName.equals("free")) {
+            asm.append("    call free\n");
+            return;
+        }
         if (c.funcName.equals("printf")) asm.append("    mov rax, ").append(xmmUsed).append("\n");
         else if (c.funcName.equals("scanf")) asm.append("    xor rax, rax\n");
         asm.append("    call ").append(c.funcName).append("\n");
@@ -216,4 +241,22 @@ public class X86Generator {
     }
 
     private boolean isMathFunction(String n) { return List.of("pow", "sqrt", "sin", "cos").contains(n); }
+
+    private void handleLoadIndexPtr(Instruction.LoadIndexPtr li) {
+        asm.append("    mov r10, ").append(frame.getAddress(li.ptr)).append("\n");
+        asm.append("    mov r11, ").append(frame.getAddress(li.index)).append("\n");
+        asm.append("    shl r11, 3\n");
+        asm.append("    add r10, r11\n");
+        asm.append("    mov rax, [r10]\n");
+        asm.append("    mov ").append(frame.getAddress(li.dest)).append(", rax\n");
+    }
+
+    private void handleStoreIndexPtr(Instruction.StoreIndexPtr si) {
+        asm.append("    mov r10, ").append(frame.getAddress(si.ptr)).append("\n");
+        asm.append("    mov r11, ").append(frame.getAddress(si.index)).append("\n");
+        asm.append("    shl r11, 3\n");
+        asm.append("    add r10, r11\n");
+        asm.append("    mov rax, ").append(frame.getAddress(si.src)).append("\n");
+        asm.append("    mov [r10], rax\n");
+    }
 }

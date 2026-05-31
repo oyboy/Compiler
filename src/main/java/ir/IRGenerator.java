@@ -4,7 +4,6 @@ import parser.ast.*;
 import parser.ast.decl.*;
 import parser.ast.expr.*;
 import parser.ast.stmt.*;
-import semantic.Type;
 import utils.ASTVisitor;
 
 import java.util.*;
@@ -19,6 +18,7 @@ public class IRGenerator implements ASTVisitor<Operand> {
     private final Deque<String> breakLabels = new ArrayDeque<>();
     private final Deque<String> continueLabels = new ArrayDeque<>();
     private int stringCounter = 0;
+    private final List<String> arraysToFree = new ArrayList<>();
 
     public IRProgram generate(ProgramNode program) {
         for (DeclarationNode decl : program.declarations) {
@@ -83,10 +83,11 @@ public class IRGenerator implements ASTVisitor<Operand> {
             currentFunction.paramNames.add(param.type + " " + param.name);
             currentFunction.variables.put(param.name, new Operand.Variable(param.name));
         }
-
+        arraysToFree.clear();
         node.body.accept(this);
 
         if (!currentBlock.isTerminated()) {
+            emitCleanup();
             emit(new Instruction.Return(null));
         }
 
@@ -113,7 +114,17 @@ public class IRGenerator implements ASTVisitor<Operand> {
     @Override
     public Operand visit(VarDeclStmtNode n) {
         if (n.size >= 0) {
-            currentFunction.variables.put(n.name + "$size$" + n.size, new Operand.Variable(n.name));
+            int totalSize = n.size * 8;
+            Operand sizeArg = new Operand.IntLiteral(totalSize);
+            emit(new Instruction.Param(0, sizeArg, "malloc"));
+
+            Operand.Temporary addr = newTemp();
+            emit(new Instruction.Call(addr, "malloc", 1));
+
+            currentFunction.variables.put(n.name, new Operand.Variable(n.name));
+            emit(new Instruction.Store(new Operand.Variable(n.name), addr));
+
+            arraysToFree.add(n.name);
             return null;
         }
         currentFunction.variables.put(n.name, new Operand.Variable(n.name));
@@ -273,8 +284,10 @@ public class IRGenerator implements ASTVisitor<Operand> {
     public Operand visit(ReturnStmtNode node) {
         if (node.value != null) {
             Operand value = node.value.accept(this);
+            emitCleanup();
             emit(new Instruction.Return(value));
         } else {
+            emitCleanup();
             emit(new Instruction.Return(null));
         }
         return null;
@@ -459,12 +472,17 @@ public class IRGenerator implements ASTVisitor<Operand> {
     @Override
     public Operand visit(AssignmentExprNode node) {
         Operand value = node.value.accept(this);
-        if (node.target instanceof IdentifierExprNode) {
-            String varName = ((IdentifierExprNode) node.target).name;
-            emit(new Instruction.Store(new Operand.Variable(varName), value));
+
+        if (node.target instanceof IdentifierExprNode id) {
+            emit(new Instruction.Store(new Operand.Variable(id.name), value));
+
         } else if (node.target instanceof ArrayIndexExprNode arrayIdx) {
             Operand index = arrayIdx.index.accept(this);
-            emit(new Instruction.StoreIndex(arrayIdx.arrayName, index, value));
+            if (isPointerVariable(arrayIdx.arrayName)) {
+                emit(new Instruction.StoreIndexPtr(new Operand.Variable(arrayIdx.arrayName), index, value));
+            } else {
+                emit(new Instruction.StoreIndex(arrayIdx.arrayName, index, value));
+            }
         }
         return value;
     }
@@ -477,6 +495,22 @@ public class IRGenerator implements ASTVisitor<Operand> {
     @Override
     public Operand visit(CallExprNode node) {
         String funcName = ((IdentifierExprNode) node.callee).name;
+
+        if (funcName.equals("malloc")) {
+            Operand sizeArg = node.arguments.get(0).accept(this);
+            emit(new Instruction.Param(0, sizeArg, "malloc"));
+            Operand.Temporary dest = newTemp();
+            emit(new Instruction.Call(dest, "malloc", 1));
+            return dest;
+        }
+
+        if (funcName.equals("free")) {
+            Operand ptrArg = node.arguments.get(0).accept(this);
+            emit(new Instruction.Param(0, ptrArg, "free"));
+            emit(new Instruction.Call(null, "free", 1));
+            return null;
+        }
+
         List<Operand> args = new ArrayList<>();
         for (int i = 0; i < node.arguments.size(); i++) {
             if (funcName.equals("scanf") && i > 0 && node.arguments.get(i) instanceof IdentifierExprNode id) {
@@ -500,7 +534,41 @@ public class IRGenerator implements ASTVisitor<Operand> {
         Operand index = node.index.accept(this);
         Operand.Temporary dest = newTemp();
 
-        emit(new Instruction.LoadIndex(dest, node.arrayName, index));
+        if (isPointerVariable(node.arrayName)) {
+            emit(new Instruction.LoadIndexPtr(dest, new Operand.Variable(node.arrayName), index));
+        } else {
+            emit(new Instruction.LoadIndex(dest, node.arrayName, index));
+        }
         return dest;
+    }
+
+    private boolean isPointerVariable(String name) {
+        return currentFunction.variables.containsKey(name) && !isLocalArray(name);
+    }
+
+    @Override
+    public Operand visit(DerefExprNode node) {
+        Operand ptr = node.pointer.accept(this);
+        Operand.Temporary dest = newTemp();
+
+        if (node.index != null) {
+            Operand index = node.index.accept(this);
+            emit(new Instruction.LoadIndexPtr(dest, ptr, index));
+        } else {
+            emit(new Instruction.LoadIndexPtr(dest, ptr, new Operand.IntLiteral(0)));
+        }
+
+        return dest;
+    }
+
+    private void emitCleanup() {
+        for (String arrayName : arraysToFree) {
+            Operand ptr = new Operand.Variable(arrayName);
+            Operand.Temporary addr = newTemp();
+            emit(new Instruction.Load(addr, ptr));
+
+            emit(new Instruction.Param(0, addr, "free"));
+            emit(new Instruction.Call(null, "free", 1));
+        }
     }
 }

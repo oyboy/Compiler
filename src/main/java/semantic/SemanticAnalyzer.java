@@ -41,10 +41,10 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
         regFn("scanf", Type.INT, Type.STRING);
         regFn("puts", Type.INT, Type.STRING);
         regFn("getchar", Type.INT);
-        regFn("malloc", Type.INT, Type.INT);
-        regFn("free", Type.VOID, Type.INT);
-        regFn("memcpy", Type.INT, Type.INT, Type.INT, Type.INT);
-        regFn("memset", Type.INT, Type.INT, Type.INT, Type.INT);
+        regFn("malloc", Type.POINTER, Type.INT);
+        regFn("free",   Type.VOID, Type.POINTER);
+        regFn("memcpy", Type.POINTER, Type.POINTER, Type.POINTER, Type.INT);
+        regFn("memset", Type.POINTER, Type.POINTER, Type.INT, Type.INT);
 
         regFn("pow", Type.FLOAT, Type.FLOAT, Type.FLOAT);
         regFn("sqrt", Type.FLOAT, Type.FLOAT);
@@ -409,6 +409,13 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
         Type targetType = node.target.accept(this);
         Type valueType = node.value.accept(this);
 
+        if (targetType instanceof Type.PointerType || targetType == Type.POINTER) {
+            if (valueType == Type.POINTER || valueType instanceof Type.PointerType) {
+                node.resolvedType = targetType;
+                return targetType;
+            }
+        }
+
         if (!(node.target instanceof IdentifierExprNode) && !(node.target instanceof ArrayIndexExprNode)) {
             error(SemanticError.ErrorType.INVALID_ASSIGNMENT_TARGET,
                     "Left side of assignment must be a variable or array element",
@@ -446,6 +453,39 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
 
         IdentifierExprNode callee = (IdentifierExprNode) node.callee;
         String funcName = callee.name;
+
+        if (funcName.equals("malloc")) {
+            if (node.arguments.size() != 1) {
+                error(SemanticError.ErrorType.ARGUMENT_COUNT_MISMATCH,
+                        "malloc expects 1 argument", currentContext(),
+                        node.line, node.column);
+                return Type.ERROR;
+            }
+            Type argType = node.arguments.get(0).accept(this);
+            if (argType != Type.INT) {
+                error(SemanticError.ErrorType.TYPE_MISMATCH,
+                        "malloc expects int size, got " + argType,
+                        currentContext(), node.line, node.column);
+            }
+            node.resolvedType = Type.POINTER;
+            return Type.POINTER;
+        }
+        if (funcName.equals("free")) {
+            if (node.arguments.size() != 1) {
+                error(SemanticError.ErrorType.ARGUMENT_COUNT_MISMATCH,
+                        "free expects 1 argument", currentContext(),
+                        node.line, node.column);
+                return Type.VOID;
+            }
+            Type argType = node.arguments.get(0).accept(this);
+            if (argType != Type.POINTER && !(argType instanceof Type.PointerType)) {
+                error(SemanticError.ErrorType.TYPE_MISMATCH,
+                        "free expects pointer, got " + argType,
+                        currentContext(), node.line, node.column);
+            }
+            node.resolvedType = Type.VOID;
+            return Type.VOID;
+        }
 
         if (funcName.equals("print")) {
             if (node.arguments.size() != 1) {
@@ -532,23 +572,27 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
     public Type visit(ArrayIndexExprNode node) {
         Optional<Symbol> sym = symbolTable.lookup(node.arrayName);
         if (sym.isEmpty()) {
-            error(SemanticError.ErrorType.UNDECLARED_IDENTIFIER, "Undeclared array '" + node.arrayName + "'", currentContext(), node.line, node.column);
+            error(SemanticError.ErrorType.UNDECLARED_IDENTIFIER, "Undeclared identifier '" + node.arrayName + "'", currentContext(), node.line, node.column);
             return Type.ERROR;
         }
 
-        if (!(sym.get().type instanceof Type.ArrayType)) {
-            error(SemanticError.ErrorType.TYPE_MISMATCH, "'" + node.arrayName + "' is not an array", currentContext(), node.line, node.column);
-            return Type.ERROR;
-        }
+        Type baseType = sym.get().type;
 
         Type indexType = node.index.accept(this);
         if (indexType != Type.INT) {
             error(SemanticError.ErrorType.TYPE_MISMATCH, "Array index must be int, got " + indexType, currentContext(), node.line, node.column);
         }
 
-        Type.ArrayType at = (Type.ArrayType) sym.get().type;
-        node.resolvedType = at.elementType;
-        return at.elementType;
+        if (baseType instanceof Type.ArrayType at) {
+            node.resolvedType = at.elementType;
+            return at.elementType;
+        } else if (baseType == Type.POINTER) {
+            node.resolvedType = Type.INT;
+            return Type.INT;
+        }
+
+        error(SemanticError.ErrorType.TYPE_MISMATCH, "'" + node.arrayName + "' is not an array or pointer", currentContext(), node.line, node.column);
+        return Type.ERROR;
     }
 
     @Override
@@ -569,6 +613,50 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
                 "Unknown type '" + typeName + "'",
                 currentContext(), line, column);
         return Type.ERROR;
+    }
+
+    @Override
+    public Type visit(DerefExprNode node) {
+        Type ptrType = node.pointer.accept(this);
+
+        if (ptrType.isError()) {
+            node.resolvedType = Type.ERROR;
+            return Type.ERROR;
+        }
+
+        if (ptrType != Type.POINTER && !(ptrType instanceof Type.PointerType)) {
+            error(SemanticError.ErrorType.TYPE_MISMATCH,
+                    "Cannot dereference non-pointer type '" + ptrType + "'",
+                    currentContext(), node.line, node.column);
+            node.resolvedType = Type.ERROR;
+            return Type.ERROR;
+        }
+
+        if (node.index != null) {
+            Type indexType = node.index.accept(this);
+            if (!indexType.isError() && indexType != Type.INT) {
+                error(SemanticError.ErrorType.TYPE_MISMATCH,
+                        "Pointer index must be int, got '" + indexType + "'",
+                        currentContext(), node.line, node.column);
+            }
+        }
+
+        Type resultType;
+        if (ptrType instanceof Type.PointerType pt) {
+            if (pt.pointeeType == null) {
+                error(SemanticError.ErrorType.TYPE_MISMATCH,
+                        "Cannot dereference void pointer",
+                        currentContext(), node.line, node.column);
+                resultType = Type.ERROR;
+            } else {
+                resultType = pt.pointeeType;
+            }
+        } else {
+            resultType = Type.INT;
+        }
+
+        node.resolvedType = resultType;
+        return resultType;
     }
 
     private Type checkBinaryOp(String op, Type left, Type right, int line, int column) {
@@ -593,13 +681,15 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
                 return Type.BOOL;
 
             case "==": case "!=":
-                if (!left.isCompatibleWith(right) && !right.isCompatibleWith(left)) {
-                    error(SemanticError.ErrorType.TYPE_MISMATCH,
-                            "Cannot compare '" + left + "' with '" + right + "'",
-                            currentContext(), line, column);
-                    return Type.ERROR;
+                if (left.isCompatibleWith(right) || right.isCompatibleWith(left) ||
+                        (left == Type.POINTER && right == Type.INT) ||
+                        (left == Type.INT && right == Type.POINTER)) {
+                    return Type.BOOL;
                 }
-                return Type.BOOL;
+                error(SemanticError.ErrorType.TYPE_MISMATCH,
+                        "Cannot compare '" + left + "' with '" + right + "'",
+                        currentContext(), line, column);
+                return Type.ERROR;
 
             case "&&": case "||":
                 if (left != Type.BOOL || right != Type.BOOL) {

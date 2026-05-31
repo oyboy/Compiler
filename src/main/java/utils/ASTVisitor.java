@@ -13,6 +13,7 @@ public interface ASTVisitor<R> {
     R visit(AssignmentExprNode node);
     R visit(CallExprNode node);
     R visit(ArrayIndexExprNode node);
+    R visit(DerefExprNode node);
 
     R visit(BlockStmtNode node);
     R visit(ExprStmtNode node);

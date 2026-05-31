@@ -239,4 +239,14 @@ public class ASTDotGenerator implements ASTVisitor<Integer> {
     public Integer visit(StmtWrapper node) {
         return node.statement.accept(this);
     }
+    @Override
+    public Integer visit(DerefExprNode node) {
+        String label = node.index != null ? "PtrIndex" : "Deref";
+        int id = createNode(label, "#FFD700");
+        edge(id, node.pointer.accept(this));
+        if (node.index != null) {
+            edge(id, node.index.accept(this));
+        }
+        return id;
+    }
 }

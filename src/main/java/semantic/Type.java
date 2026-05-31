@@ -12,6 +12,7 @@ public abstract class Type {
     public static final PrimitiveType VOID   = new PrimitiveType("void");
     public static final PrimitiveType STRING = new PrimitiveType("string");
     public static final PrimitiveType ERROR  = new PrimitiveType("<error>");
+    public static final PrimitiveType POINTER = new PrimitiveType("pointer");
 
     public abstract boolean isCompatibleWith(Type other);
     public abstract String getName();
@@ -38,6 +39,46 @@ public abstract class Type {
 
         @Override
         public int hashCode() { return name.hashCode(); }
+    }
+
+    public static class PointerType extends Type {
+        public final Type pointeeType; // null → void*
+
+        public PointerType(Type pointeeType) {
+            this.pointeeType = pointeeType;
+        }
+
+        public static PointerType of(Type inner) {
+            return new PointerType(inner);
+        }
+
+        @Override
+        public String getName() {
+            return (pointeeType == null ? "void" : pointeeType.getName()) + "*";
+        }
+
+        @Override
+        public boolean isCompatibleWith(Type other) {
+            if (other == ERROR)   return true;
+            if (other == POINTER) return true;
+            if (other instanceof PointerType pt) {
+                if (this.pointeeType == null || pt.pointeeType == null) return true;
+                return this.pointeeType.isCompatibleWith(pt.pointeeType);
+            }
+            return false;
+        }
+
+        @Override
+        public boolean isNumeric() { return false; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof PointerType pt)) return false;
+            return Objects.equals(pointeeType, pt.pointeeType);
+        }
+
+        @Override
+        public int hashCode() { return Objects.hash("ptr", pointeeType); }
     }
 
     public static class FunctionType extends Type {
@@ -121,6 +162,7 @@ public abstract class Type {
             case "bool":   return BOOL;
             case "void":   return VOID;
             case "string": return STRING;
+            case "pointer": return POINTER;
             default:       return null;
         }
     }

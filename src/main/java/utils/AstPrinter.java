@@ -148,4 +148,12 @@ public class AstPrinter implements ASTVisitor<String> {
     public String visit(StmtWrapper node) {
         return node.statement.accept(this);
     }
+    @Override
+    public String visit(DerefExprNode node) {
+        if (node.index != null) {
+            return "(deref " + node.pointer.accept(this)
+                    + " [" + node.index.accept(this) + "])";
+        }
+        return "(deref " + node.pointer.accept(this) + ")";
+    }
 }

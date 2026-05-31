@@ -236,4 +236,12 @@ public class TypeAnnotatedPrinter implements ASTVisitor<String> {
     public String visit(StmtWrapper node) {
         return node.statement.accept(this);
     }
+    @Override
+    public String visit(DerefExprNode node) {
+        String ptr = node.pointer.accept(this);
+        if (node.index != null) {
+            return ptr + "[" + node.index.accept(this) + "]";
+        }
+        return "*(" + ptr + ")";
+    }
 }

@@ -33,6 +33,7 @@ public class Scanner {
         keywords.put("fn", TokenType.KW_FN);
         keywords.put("break", TokenType.KW_BREAK);
         keywords.put("continue", TokenType.KW_CONTINUE);
+        keywords.put("pointer", TokenType.KW_POINTER);
     }
 
     public Scanner(String source) {

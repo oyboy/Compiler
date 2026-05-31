@@ -116,9 +116,24 @@ fn main() -> int {
 
     benchmark_demo();
 
+    test();
+
     return 0;
 }
 
 fn unreachable_function() -> void {
     print("Unused function");
+}
+
+fn test() -> void {
+    int n = 10;
+    pointer arr = malloc(n * 8);
+
+    int i = 0;
+    while (i < n) {
+        arr[i] = i * 2;
+        i = i + 1;
+    }
+
+    free(arr);
 }

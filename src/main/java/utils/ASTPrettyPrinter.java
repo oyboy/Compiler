@@ -224,4 +224,11 @@ public class ASTPrettyPrinter implements ASTVisitor<String> {
     public String visit(StmtWrapper node) {
         return node.statement.accept(this);
     }
+    @Override
+    public String visit(DerefExprNode node) {
+        if (node.index != null) {
+            return node.pointer.accept(this) + "[" + node.index.accept(this) + "]";
+        }
+        return "*(" + node.pointer.accept(this) + ")";
+    }
 }

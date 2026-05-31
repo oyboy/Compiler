@@ -286,17 +286,17 @@ public class Parser {
     }
 
     private boolean isVarDeclaration() {
-        if (check(KW_INT) || check(KW_FLOAT) || check(KW_BOOL) || check(KW_VOID)) return true;
+        if (check(KW_INT) || check(KW_FLOAT) || check(KW_BOOL) || check(KW_VOID) || check(KW_POINTER)) return true;
         return check(IDENTIFIER) && current + 1 < tokens.size() && tokens.get(current + 1).type == IDENTIFIER;
     }
 
     private String parseTypeName() {
-        if (match(KW_INT, KW_FLOAT, KW_BOOL, KW_VOID, IDENTIFIER)) return previous().lexeme;
+        if (match(KW_INT, KW_FLOAT, KW_BOOL, KW_VOID, KW_POINTER, IDENTIFIER)) return previous().lexeme;
         throw error(peek(), "Expect type.");
     }
 
     private Token parseType() {
-        if (match(KW_INT, KW_FLOAT, KW_BOOL, KW_VOID, IDENTIFIER)) return previous();
+        if (match(KW_INT, KW_FLOAT, KW_BOOL, KW_VOID, KW_POINTER, IDENTIFIER)) return previous();
         throw error(peek(), "Expect type.");
     }
 

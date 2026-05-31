@@ -237,4 +237,28 @@ public abstract class Instruction {
             return "STORE_INDEX " + arrayName + ", " + index + ", " + src + commentStr();
         }
     }
+
+    public static class LoadIndexPtr extends Instruction {
+        public final Operand dest;
+        public final Operand ptr;
+        public final Operand index;
+
+        public LoadIndexPtr(Operand dest, Operand ptr, Operand index) {
+            this.dest  = dest;
+            this.ptr   = ptr;
+            this.index = index;
+        }
+    }
+
+    public static class StoreIndexPtr extends Instruction {
+        public final Operand ptr;
+        public final Operand index;
+        public final Operand src;
+
+        public StoreIndexPtr(Operand ptr, Operand index, Operand src) {
+            this.ptr   = ptr;
+            this.index = index;
+            this.src   = src;
+        }
+    }
 }
