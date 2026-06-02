@@ -1,0 +1,159 @@
+Program:
+  FunctionDecl: fib -> int
+    Parameters: [int n, int memo]
+    Body:
+      Block:
+        If:
+          Condition: (n <= 1)
+          Then:
+            Block:
+              Return: n
+        If:
+          Condition: (memo[n] != (-1))
+          Then:
+            Block:
+              Return: memo[n]
+        VarDecl: int value
+        ExprStmt: (value = (fib((n - 1), memo) + fib((n - 2), memo)))
+        ExprStmt: (memo[n] = value)
+        Return: value
+  FunctionDecl: factorial -> int
+    Parameters: [int n]
+    Body:
+      Block:
+        If:
+          Condition: (n <= 1)
+          Then:
+            Block:
+              Return: 1
+        Return: (n * factorial((n - 1)))
+  FunctionDecl: bubble_sort -> void
+    Parameters: [int arr, int size]
+    Body:
+      Block:
+        For:
+          Init:
+            VarDecl: int i = 0
+          Condition: (i < size)
+          Update: (i = (i + 1))
+          Body:
+            Block:
+              For:
+                Init:
+                  VarDecl: int j = 0
+                Condition: (j < (size - 1))
+                Update: (j = (j + 1))
+                Body:
+                  Block:
+                    If:
+                      Condition: (arr[j] > arr[(j + 1)])
+                      Then:
+                        Block:
+                          VarDecl: int temp
+                          ExprStmt: (temp = arr[j])
+                          ExprStmt: (arr[j] = arr[(j + 1)])
+                          ExprStmt: (arr[(j + 1)] = temp)
+  FunctionDecl: print_array -> void
+    Parameters: [int arr, int size]
+    Body:
+      Block:
+        For:
+          Init:
+            VarDecl: int i = 0
+          Condition: (i < size)
+          Update: (i = (i + 1))
+          Body:
+            Block:
+              ExprStmt: print_int(arr[i])
+  FunctionDecl: math_demo -> void
+    Parameters: []
+    Body:
+      Block:
+        ExprStmt: print_string("Math demo")
+        ExprStmt: print_float(pow(2.0, 8.0))
+        ExprStmt: print_float(sqrt(144.0))
+        ExprStmt: print_float(sin(30.0))
+        ExprStmt: print_float(cos(30.0))
+        If:
+          Condition: false
+          Then:
+            Block:
+              ExprStmt: print_string("This code is never executed")
+  FunctionDecl: benchmark_demo -> void
+    Parameters: []
+    Body:
+      Block:
+        VarDecl: int sum
+        ExprStmt: (sum = 0)
+        For:
+          Init:
+            VarDecl: int i = 0
+          Condition: (i < 1000)
+          Update: (i = (i + 1))
+          Body:
+            Block:
+              ExprStmt: (sum = (sum + i))
+        ExprStmt: print_int(sum)
+  FunctionDecl: main -> int
+    Parameters: []
+    Body:
+      Block:
+        ExprStmt: print_string("Initial array")
+        VarDecl: int arr
+        ExprStmt: (arr[0] = 50)
+        ExprStmt: (arr[1] = 20)
+        ExprStmt: (arr[2] = 40)
+        ExprStmt: (arr[3] = 10)
+        ExprStmt: (arr[4] = 30)
+        ExprStmt: (arr[5] = 90)
+        ExprStmt: (arr[6] = 70)
+        ExprStmt: (arr[7] = 60)
+        ExprStmt: (arr[8] = 80)
+        ExprStmt: (arr[9] = 0)
+        ExprStmt: print_array(arr, 10)
+        ExprStmt: bubble_sort(arr, 10)
+        ExprStmt: print_string("Sorted array")
+        ExprStmt: print_array(arr, 10)
+        ExprStmt: print_string("Factorial of 5")
+        ExprStmt: print_int(factorial(5))
+        VarDecl: int memo
+        For:
+          Init:
+            VarDecl: int i = 0
+          Condition: (i < 100)
+          Update: (i = (i + 1))
+          Body:
+            Block:
+              ExprStmt: (memo[i] = (-1))
+        ExprStmt: print_string("Fibonacci of 10")
+        ExprStmt: print_int(fib(10, memo))
+        VarDecl: int x
+        ExprStmt: printf("Enter a number: ")
+        ExprStmt: scanf("%d", x)
+        ExprStmt: printf("You entered: %d\n", x)
+        ExprStmt: printf("sin(x) = %f\n", sin(x))
+        ExprStmt: printf("cos(x) = %f\n", cos(x))
+        ExprStmt: math_demo()
+        ExprStmt: benchmark_demo()
+        ExprStmt: test()
+        Return: 0
+  FunctionDecl: unreachable_function -> void
+    Parameters: []
+    Body:
+      Block:
+        ExprStmt: print_string("Unused function")
+  FunctionDecl: test -> void
+    Parameters: []
+    Body:
+      Block:
+        VarDecl: int n = 10
+        VarDecl: pointer arr = malloc((n * 8))
+        VarDecl: int i = 0
+        While:
+          Condition: (i < n)
+          Body:
+            Block:
+              ExprStmt: (arr[i] = (i * 2))
+              ExprStmt: (i = (i + 1))
+        ExprStmt: free(arr)
+

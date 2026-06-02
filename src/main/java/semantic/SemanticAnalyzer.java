@@ -577,18 +577,17 @@ public class SemanticAnalyzer implements ASTVisitor<Type> {
         }
 
         Type baseType = sym.get().type;
-
-        Type indexType = node.index.accept(this);
-        if (indexType != Type.INT) {
-            error(SemanticError.ErrorType.TYPE_MISMATCH, "Array index must be int, got " + indexType, currentContext(), node.line, node.column);
-        }
+        node.index.accept(this);
 
         if (baseType instanceof Type.ArrayType at) {
             node.resolvedType = at.elementType;
             return at.elementType;
-        } else if (baseType == Type.POINTER) {
-            node.resolvedType = Type.INT;
-            return Type.INT;
+        }
+
+        if (baseType == Type.POINTER || baseType instanceof Type.PointerType) {
+            Type elementType = (baseType instanceof Type.PointerType pt) ? pt.pointeeType : Type.INT;
+            node.resolvedType = elementType;
+            return elementType;
         }
 
         error(SemanticError.ErrorType.TYPE_MISMATCH, "'" + node.arrayName + "' is not an array or pointer", currentContext(), node.line, node.column);

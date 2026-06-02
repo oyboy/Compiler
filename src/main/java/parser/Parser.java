@@ -65,7 +65,9 @@ public class Parser {
                 String type = parseTypeName();
                 Token paramName = consume(IDENTIFIER, "Expect parameter name.");
                 int size = -1;
+
                 if (match(LBRACKET)) {
+                    size = 0;
                     if (check(LIT_INT)) {
                         size = (Integer) advance().literal;
                     }

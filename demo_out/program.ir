@@ -1,0 +1,299 @@
+function fib: int (int n, int memo)
+entry:
+    t0 = CMP_LE n, 1
+    JUMP_IF t0, L_true
+    JUMP L_endif
+L_true:
+    RETURN n
+L_endif:
+    ir.Instruction$LoadIndexPtr@49c2faae
+    t2 = NEG 1
+    t3 = CMP_NE t1, t2
+    JUMP_IF t3, L_true_0
+    JUMP L_endif_1
+L_true_0:
+    ir.Instruction$LoadIndexPtr@2e0fa5d3
+    RETURN t4
+L_endif_1:
+    t5 = SUB n, 1
+    PARAM 0, t5
+    PARAM 1, memo
+    t6 = CALL fib, 2
+    t7 = SUB n, 2
+    PARAM 0, t7
+    PARAM 1, memo
+    t8 = CALL fib, 2
+    t9 = ADD t6, t8
+    STORE [value], t9
+    t10 = LOAD [value]
+    ir.Instruction$StoreIndexPtr@22d8cfe0
+    t11 = LOAD [value]
+    RETURN t11
+
+function factorial: int (int n)
+entry:
+    t0 = CMP_LE n, 1
+    JUMP_IF t0, L_true
+    JUMP L_endif
+L_true:
+    RETURN 1
+L_endif:
+    t1 = SUB n, 1
+    PARAM 0, t1
+    t2 = CALL factorial, 1
+    t3 = MUL n, t2
+    RETURN t3
+
+function bubble_sort: void (int arr, int size)
+entry:
+    STORE [i], 0
+    JUMP L_for
+L_for:
+    t0 = LOAD [i]
+    t1 = CMP_LT t0, size
+    JUMP_IF t1, L_forbody
+    JUMP L_endfor
+L_forbody:
+    STORE [j], 0
+    JUMP L_for_0
+L_for_0:
+    t2 = LOAD [j]
+    t3 = SUB size, 1
+    t4 = CMP_LT t2, t3
+    JUMP_IF t4, L_forbody_1
+    JUMP L_endfor_3
+L_forbody_1:
+    t5 = LOAD [j]
+    ir.Instruction$LoadIndexPtr@579bb367
+    t7 = LOAD [j]
+    t8 = ADD t7, 1
+    ir.Instruction$LoadIndexPtr@1de0aca6
+    t10 = CMP_GT t6, t9
+    JUMP_IF t10, L_true
+    JUMP L_endif
+L_true:
+    t11 = LOAD [j]
+    ir.Instruction$LoadIndexPtr@255316f2
+    STORE [temp], t12
+    t13 = LOAD [j]
+    t14 = ADD t13, 1
+    ir.Instruction$LoadIndexPtr@41906a77
+    t16 = LOAD [j]
+    ir.Instruction$StoreIndexPtr@4b9af9a9
+    t17 = LOAD [temp]
+    t18 = LOAD [j]
+    t19 = ADD t18, 1
+    ir.Instruction$StoreIndexPtr@5387f9e0
+    JUMP L_endif
+L_endif:
+    t20 = LOAD [j]
+    t21 = ADD t20, 1
+    STORE [j], t21
+    JUMP L_for_0
+L_endfor_3:
+    t22 = LOAD [i]
+    t23 = ADD t22, 1
+    STORE [i], t23
+    JUMP L_for
+L_endfor:
+    RETURN
+
+function print_array: void (int arr, int size)
+entry:
+    STORE [i], 0
+    JUMP L_for
+L_for:
+    t0 = LOAD [i]
+    t1 = CMP_LT t0, size
+    JUMP_IF t1, L_forbody
+    JUMP L_endfor
+L_forbody:
+    t2 = LOAD [i]
+    ir.Instruction$LoadIndexPtr@6e5e91e4
+    PARAM 0, t3
+    CALL print_int, 1
+    t4 = LOAD [i]
+    t5 = ADD t4, 1
+    STORE [i], t5
+    JUMP L_for
+L_endfor:
+    RETURN
+
+function math_demo: void ()
+entry:
+    PARAM 0, L_str_0
+    CALL print_string, 1
+    PARAM 0, 2.0
+    PARAM 1, 8.0
+    t0 = CALL pow, 2
+    PARAM 0, t0
+    CALL print_float, 1
+    PARAM 0, 144.0
+    t1 = CALL sqrt, 1
+    PARAM 0, t1
+    CALL print_float, 1
+    PARAM 0, 30.0
+    t2 = CALL sin, 1
+    PARAM 0, t2
+    CALL print_float, 1
+    PARAM 0, 30.0
+    t3 = CALL cos, 1
+    PARAM 0, t3
+    CALL print_float, 1
+    JUMP L_endif
+L_endif:
+    RETURN
+
+function benchmark_demo: void ()
+entry:
+    STORE [sum], 0
+    STORE [i], 0
+    JUMP L_for
+L_for:
+    t0 = LOAD [i]
+    t1 = CMP_LT t0, 1000
+    JUMP_IF t1, L_forbody
+    JUMP L_endfor
+L_forbody:
+    t2 = LOAD [sum]
+    t3 = LOAD [i]
+    t4 = ADD t2, t3
+    STORE [sum], t4
+    t5 = LOAD [i]
+    t6 = ADD t5, 1
+    STORE [i], t6
+    JUMP L_for
+L_endfor:
+    t7 = LOAD [sum]
+    PARAM 0, t7
+    CALL print_int, 1
+    RETURN
+
+function main: int ()
+entry:
+    PARAM 0, L_str_2
+    CALL print_string, 1
+    PARAM 0, 80
+    t0 = CALL malloc, 1
+    STORE [arr], t0
+    ir.Instruction$StoreIndexPtr@6d5380c2
+    ir.Instruction$StoreIndexPtr@45ff54e6
+    ir.Instruction$StoreIndexPtr@2328c243
+    ir.Instruction$StoreIndexPtr@bebdb06
+    ir.Instruction$StoreIndexPtr@7a4f0f29
+    ir.Instruction$StoreIndexPtr@45283ce2
+    ir.Instruction$StoreIndexPtr@2077d4de
+    ir.Instruction$StoreIndexPtr@7591083d
+    ir.Instruction$StoreIndexPtr@77a567e1
+    ir.Instruction$StoreIndexPtr@736e9adb
+    t1 = LOAD [arr]
+    PARAM 0, t1
+    PARAM 1, 10
+    CALL print_array, 2
+    t2 = LOAD [arr]
+    PARAM 0, t2
+    PARAM 1, 10
+    CALL bubble_sort, 2
+    PARAM 0, L_str_3
+    CALL print_string, 1
+    t3 = LOAD [arr]
+    PARAM 0, t3
+    PARAM 1, 10
+    CALL print_array, 2
+    PARAM 0, L_str_4
+    CALL print_string, 1
+    PARAM 0, 5
+    t4 = CALL factorial, 1
+    PARAM 0, t4
+    CALL print_int, 1
+    PARAM 0, 800
+    t5 = CALL malloc, 1
+    STORE [memo], t5
+    STORE [i], 0
+    JUMP L_for
+L_for:
+    t6 = LOAD [i]
+    t7 = CMP_LT t6, 100
+    JUMP_IF t7, L_forbody
+    JUMP L_endfor
+L_forbody:
+    t8 = NEG 1
+    t9 = LOAD [i]
+    ir.Instruction$StoreIndexPtr@6d21714c
+    t10 = LOAD [i]
+    t11 = ADD t10, 1
+    STORE [i], t11
+    JUMP L_for
+L_endfor:
+    PARAM 0, L_str_5
+    CALL print_string, 1
+    t12 = LOAD [memo]
+    PARAM 0, 10
+    PARAM 1, t12
+    t13 = CALL fib, 2
+    PARAM 0, t13
+    CALL print_int, 1
+    PARAM 0, L_str_6
+    t14 = CALL printf, 1
+    PARAM 0, L_str_7
+    PARAM 1, [x]
+    t15 = CALL scanf, 2
+    t16 = LOAD [x]
+    PARAM 0, L_str_8
+    PARAM 1, t16
+    t17 = CALL printf, 2
+    t18 = LOAD [x]
+    PARAM 0, t18
+    t19 = CALL sin, 1
+    PARAM 0, L_str_9
+    PARAM 1, t19
+    t20 = CALL printf, 2
+    t21 = LOAD [x]
+    PARAM 0, t21
+    t22 = CALL cos, 1
+    PARAM 0, L_str_10
+    PARAM 1, t22
+    t23 = CALL printf, 2
+    CALL math_demo, 0
+    CALL benchmark_demo, 0
+    CALL test, 0
+    t24 = LOAD [arr]
+    PARAM 0, t24
+    CALL free, 1
+    t25 = LOAD [memo]
+    PARAM 0, t25
+    CALL free, 1
+    RETURN 0
+
+function test: void ()
+entry:
+    STORE [n], 10
+    t0 = LOAD [n]
+    t1 = MUL t0, 8
+    PARAM 0, t1
+    t2 = CALL malloc, 1
+    STORE [arr], t2
+    STORE [i], 0
+    JUMP L_loop
+L_loop:
+    t3 = LOAD [i]
+    t4 = LOAD [n]
+    t5 = CMP_LT t3, t4
+    JUMP_IF t5, L_body
+    JUMP L_endloop
+L_body:
+    t6 = LOAD [i]
+    t7 = MUL t6, 2
+    t8 = LOAD [i]
+    ir.Instruction$StoreIndexPtr@108c4c35
+    t9 = LOAD [i]
+    t10 = ADD t9, 1
+    STORE [i], t10
+    JUMP L_loop
+L_endloop:
+    t11 = LOAD [arr]
+    PARAM 0, t11
+    CALL free, 1
+    RETURN
+
+
