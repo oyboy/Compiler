@@ -1,0 +1,20 @@
+fn unused() -> int {
+    return 777;
+}
+
+fn main() -> int {
+    int x = 2 + 3 * 4;
+    x += 1;
+
+    bool flag = true || false;
+
+    print("x value:");
+    print(x);
+
+    print("flag value:");
+    print(flag);
+
+    return 0;
+
+    print("unreachable");
+}
